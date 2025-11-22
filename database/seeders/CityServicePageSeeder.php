@@ -19,12 +19,16 @@ class CityServicePageSeeder extends Seeder
         }
 
         foreach ($services as $service) {
-            CityServicePage::create([
-                'city_id' => $cleveland->id,
-                'service_id' => $service->id,
-                'custom_intro' => null,
-                'custom_pricing' => null,
-            ]);
+            CityServicePage::firstOrCreate(
+                [
+                    'city_id' => $cleveland->id,
+                    'service_id' => $service->id,
+                ],
+                [
+                    'custom_intro' => null,
+                    'custom_pricing' => null,
+                ]
+            );
         }
     }
 }

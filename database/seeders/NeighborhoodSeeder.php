@@ -26,11 +26,15 @@ class NeighborhoodSeeder extends Seeder
         ];
 
         foreach ($neighborhoods as $name) {
-            Neighborhood::create([
-                'city_id' => $cleveland->id,
-                'name' => $name,
-                'slug' => Str::slug($name),
-            ]);
+            Neighborhood::firstOrCreate(
+                [
+                    'city_id' => $cleveland->id,
+                    'slug' => Str::slug($name),
+                ],
+                [
+                    'name' => $name,
+                ]
+            );
         }
     }
 }
