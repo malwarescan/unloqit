@@ -6,8 +6,9 @@ cmds = [
   "composer install --no-dev --optimize-autoloader --no-interaction",
   "php artisan config:clear || true",
   "php artisan route:clear || true",
-  "php artisan view:clear || true"
+  "php artisan view:clear || true",
+  "chmod +x start.sh"
 ]
 
 [start]
-cmd = "php -d variables_order=EGPCS -S 0.0.0.0:${PORT:-8080} -t public"
+cmd = "bash start.sh"

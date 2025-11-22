@@ -33,8 +33,12 @@ RUN composer dump-autoload --optimize
 # Verify MySQL extensions are installed
 RUN php -m | grep -i mysql && php -m | grep -i pdo || (echo "ERROR: MySQL extensions not found!" && exit 1)
 
+# Copy start script
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 # Expose port
 EXPOSE 8080
 
-# Start PHP built-in server
-CMD php -d variables_order=EGPCS -S 0.0.0.0:${PORT:-8080} -t public
+# Start PHP built-in server via script
+CMD ["/app/start.sh"]
