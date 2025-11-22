@@ -11,6 +11,11 @@
     
     <link rel="canonical" href="@yield('canonical', url('/'))">
     
+    {{-- Favicon - Multiple formats for browser compatibility --}}
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v={{ filemtime(public_path('favicon.ico')) }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v={{ filemtime(public_path('favicon.ico')) }}">
+    <link rel="apple-touch-icon" href="{{ asset('favicon.ico') }}?v={{ filemtime(public_path('favicon.ico')) }}">
+    
     @yield('meta_extra')
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
