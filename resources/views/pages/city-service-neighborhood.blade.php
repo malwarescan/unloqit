@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', $service->name . ' in ' . $neighborhood->name . ', ' . $city->name . ' | Unloqit')
-@section('meta_description', 'Professional ' . $service->name . ' services in ' . $neighborhood->name . ', ' . $city->name . ', ' . $city->state . '. Fast, reliable, and available 24/7.')
+@section('title', $title ?? ($service->name . ' in ' . $neighborhood->name . ', ' . $city->name . ' | Unloqit'))
+@section('meta_description', $meta_description ?? ('Professional ' . $service->name . ' services in ' . $neighborhood->name . ', ' . $city->name . ', ' . $city->state . '. Fast, reliable, and available 24/7.'))
 @section('canonical', $neighborhoodUrl ?? ($city->slug === 'cleveland' ? route('cleveland.service.neighborhood.show', ['service' => $service->slug, 'neighborhood' => $neighborhood->slug]) : route('city.service.neighborhood.show', ['city' => $city->slug, 'service' => $service->slug, 'neighborhood' => $neighborhood->slug])))
 
 @section('meta_extra')

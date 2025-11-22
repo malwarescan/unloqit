@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Request a Locksmith | Instant Help | Unloqit')
-@section('meta_description', 'Request a locksmith instantly. Unloqit Pro Service Providers in your area are ready to help. Fast response, professional service.')
+@section('title', $title ?? 'Request a Locksmith | Instant Help | Unloqit')
+@section('meta_description', $meta_description ?? 'Request a locksmith instantly. Unloqit Pro Service Providers in your area are ready to help. Fast response, professional service.')
 @section('canonical', route('request.show'))
 
 @section('content')

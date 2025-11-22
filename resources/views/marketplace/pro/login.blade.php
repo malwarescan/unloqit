@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Unloqit Pro Login | Unloqit')
-@section('meta_description', 'Login to your Unloqit Pro dashboard to manage jobs and earnings.')
+@section('title', $title ?? 'Unloqit Pro Login | Unloqit')
+@section('meta_description', $meta_description ?? 'Login to your Unloqit Pro dashboard to manage jobs and earnings.')
 @section('canonical', route('pro.login'))
 
 @section('content')

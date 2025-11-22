@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Become an Unloqit Pro Service Provider | Join Unloqit Marketplace')
-@section('meta_description', 'Join Unloqit as a verified locksmith. Set your own schedule, earn competitive rates, and help customers in your area.')
+@section('title', $title ?? 'Become an Unloqit Pro Service Provider | Join Unloqit Marketplace')
+@section('meta_description', $meta_description ?? 'Join Unloqit as a verified locksmith. Set your own schedule, earn competitive rates, and help customers in your area.')
 @section('canonical', route('pro.register'))
 
 @section('content')

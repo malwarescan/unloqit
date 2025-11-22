@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', $city->name . ' Locksmith | 24/7 Lockout & Car Keys | Unloqit')
-@section('meta_description', 'Reliable 24/7 locksmith services in ' . $city->name . ', ' . $city->state . '. Car lockouts, rekeys, key programming, residential & commercial. Fast arrival times.')
+@section('title', $title ?? ($city->name . ' Locksmith | 24/7 Lockout & Car Keys | Unloqit'))
+@section('meta_description', $meta_description ?? ('Reliable 24/7 locksmith services in ' . $city->name . ', ' . $city->state . '. Car lockouts, rekeys, key programming, residential & commercial. Fast arrival times.'))
 @section('canonical', $cityUrl ?? ($city->slug === 'cleveland' ? route('cleveland.show') : route('city.show', ['city' => $city->slug])))
 
 @section('meta_extra')

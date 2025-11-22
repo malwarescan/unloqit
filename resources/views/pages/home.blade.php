@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Unloqit - 24/7 Locksmith Services in Cleveland, Ohio')
-@section('meta_description', 'Reliable 24/7 locksmith services in Cleveland. Car lockouts, rekeys, key programming, residential & commercial. Fast arrival times.')
+@section('title', $title ?? 'Unloqit - 24/7 Locksmith Services in Cleveland, Ohio')
+@section('meta_description', $meta_description ?? 'Reliable 24/7 locksmith services in Cleveland. Car lockouts, rekeys, key programming, residential & commercial. Fast arrival times.')
 @section('canonical', route('home'))
 
 @section('meta_extra')

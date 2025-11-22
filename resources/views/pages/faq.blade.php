@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', $faq->question . ' | Unloqit FAQ')
-@section('meta_description', strip_tags(substr($faq->answer, 0, 160)))
+@section('title', $title ?? ($faq->question . ' | Unloqit FAQ'))
+@section('meta_description', $meta_description ?? strip_tags(substr($faq->answer, 0, 160)))
 @section('canonical', route('faq.show', ['slug' => $faq->slug]))
 
 @section('meta_extra')

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', $guide->title . ' | Unloqit')
-@section('meta_description', strip_tags(substr($guide->content, 0, 160)))
+@section('title', $title ?? ($guide->title . ' | Unloqit'))
+@section('meta_description', $meta_description ?? strip_tags(substr($guide->content, 0, 160)))
 @section('canonical', route('guide.show', ['slug' => $guide->slug]))
 
 @section('meta_extra')
