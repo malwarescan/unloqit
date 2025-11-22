@@ -26,9 +26,30 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 }
 
 // Register the Composer autoloader...
-require __DIR__.'/../vendor/autoload.php';
+if (!file_exists($autoload = __DIR__.'/../vendor/autoload.php')) {
+    http_response_code(500);
+    die('ERROR: vendor/autoload.php not found. Run: composer install');
+}
+
+require $autoload;
 
 // Bootstrap Laravel and handle the request...
-(require_once __DIR__.'/../bootstrap/app.php')
-    ->handleRequest(Request::capture());
+try {
+    $app = require_once __DIR__.'/../bootstrap/app.php';
+    $app->handleRequest(Request::capture());
+} catch (Throwable $e) {
+    // If APP_DEBUG is enabled, show error
+    if (env('APP_DEBUG', false)) {
+        http_response_code(500);
+        echo '<h1>Laravel Error</h1>';
+        echo '<pre>' . htmlspecialchars($e->getMessage()) . "\n\n";
+        echo htmlspecialchars($e->getTraceAsString()) . '</pre>';
+        exit;
+    }
+    
+    // Otherwise, log and show generic error
+    error_log('Laravel Bootstrap Error: ' . $e->getMessage());
+    http_response_code(500);
+    die('Application Error. Check logs.');
+}
 

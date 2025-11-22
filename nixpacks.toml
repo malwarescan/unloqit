@@ -1,24 +1,13 @@
 [phases.setup]
-nixPkgs = ["php82"]
-
-[phases.install]
-cmds = [
-  "composer install --no-dev --optimize-autoloader --no-interaction"
-]
+aptPkgs = ["php8.2-mysql", "php8.2-pdo", "php8.2-pdo_mysql"]
 
 [phases.build]
-aptPkgs = [
-  "php8.2-mysql",
-  "php8.2-pdo",
-  "php8.2-pdo_mysql"
-]
 cmds = [
-  "php -m | grep -i mysql || echo 'MySQL extensions check'",
-  "php -m | grep -i pdo || echo 'PDO extensions check'"
+  "composer install --no-dev --optimize-autoloader --no-interaction",
+  "php artisan config:clear || true",
+  "php artisan route:clear || true",
+  "php artisan view:clear || true"
 ]
-
-[providers]
-php = "82"
 
 [start]
-cmd = "php -d variables_order=EGPCS -S 0.0.0.0:${PORT} -t public"
+cmd = "php -d variables_order=EGPCS -S 0.0.0.0:${PORT:-8080} -t public"
