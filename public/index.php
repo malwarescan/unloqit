@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Http\Request;
+
+define('LARAVEL_START', microtime(true));
+
+// Suppress PDO::MYSQL_ATTR_SSL_CA deprecation warnings (PHP 8.5+)
+// These are from Laravel's vendor files and will be fixed in future updates
+if (PHP_VERSION_ID >= 80500) {
+    // Register error handler to filter specific warnings before autoloading
+    set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+        // Suppress specific PDO deprecation warnings from Laravel vendor/config files
+        if ($errno === E_DEPRECATED && 
+            strpos($errstr, 'PDO::MYSQL_ATTR_SSL_CA') !== false &&
+            (strpos($errfile, 'vendor/laravel/framework') !== false || 
+             strpos($errfile, 'config/database.php') !== false)) {
+            return true; // Suppress this warning
+        }
+        return false; // Let other errors through
+    }, E_ALL);
+}
+
+// Determine if the application is in maintenance mode...
+if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+    require $maintenance;
+}
+
+// Register the Composer autoloader...
+require __DIR__.'/../vendor/autoload.php';
+
+// Bootstrap Laravel and handle the request...
+(require_once __DIR__.'/../bootstrap/app.php')
+    ->handleRequest(Request::capture());
+
