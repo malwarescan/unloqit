@@ -7,13 +7,20 @@ use App\Services\Schema\BreadcrumbSchema;
 use App\Services\Schema\FAQPageSchema;
 use App\Services\Schema\OrganizationSchema;
 use App\Services\Schema\WebPageSchema;
+use App\Services\TitleMetaService;
 use Illuminate\View\View;
 
 class FaqController extends Controller
 {
+    public function __construct(
+        private TitleMetaService $titleMeta
+    ) {}
+
     public function show(string $slug): View
     {
         $faq = Faq::where('slug', $slug)->firstOrFail();
+
+        $titleMeta = $this->titleMeta->forFaq($faq->question);
 
         $breadcrumbs = [
             ['name' => 'Home', 'url' => route('home')],
@@ -24,9 +31,9 @@ class FaqController extends Controller
             OrganizationSchema::base(),
             FAQPageSchema::fromSingleFaq($faq),
             WebPageSchema::generate(
-                "{$faq->question} | Unloqit FAQ",
+                $titleMeta['title'],
                 route('faq.show', ['slug' => $faq->slug]),
-                strip_tags(substr($faq->answer, 0, 160))
+                $titleMeta['meta_description']
             ),
             BreadcrumbSchema::generate($breadcrumbs),
         ];
@@ -37,6 +44,8 @@ class FaqController extends Controller
             'faq' => $faq,
             'jsonld' => $jsonld,
             'breadcrumbs' => $breadcrumbs,
+            'title' => $titleMeta['title'],
+            'meta_description' => $titleMeta['meta_description'],
         ]);
     }
 }

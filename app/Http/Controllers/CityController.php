@@ -9,11 +9,16 @@ use App\Services\Schema\BreadcrumbSchema;
 use App\Services\Schema\LocalBusinessSchema;
 use App\Services\Schema\OrganizationSchema;
 use App\Services\Schema\WebPageSchema;
+use App\Services\TitleMetaService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CityController extends Controller
 {
+    public function __construct(
+        private TitleMetaService $titleMeta
+    ) {}
+
     public function showCleveland(): View
     {
         $city = City::where('slug', 'cleveland')->firstOrFail();
@@ -33,14 +38,18 @@ class CityController extends Controller
         $isCleveland = $city->slug === 'cleveland';
         $cityUrl = $isCleveland ? route('cleveland.show') : route('city.show', ['city' => $city->slug]);
 
-        // Check for generated content
+        // Check for generated content first, fallback to TitleMetaService
         $generatedContent = GeneratedContent::where('content_type', 'city')
             ->where('city_id', $city->id)
             ->where('is_published', true)
             ->first();
 
-        $title = $generatedContent?->title ?? "{$city->name} Locksmith | 24/7 Lockout & Car Keys | Unloqit";
-        $metaDescription = $generatedContent?->meta_description ?? "Reliable 24/7 locksmith services in {$city->name}, {$city->state}. Car lockouts, rekeys, key programming, residential & commercial. Fast arrival times.";
+        $titleMeta = $generatedContent 
+            ? ['title' => $generatedContent->title, 'meta_description' => $generatedContent->meta_description]
+            : $this->titleMeta->forCity($city);
+
+        $title = $titleMeta['title'];
+        $metaDescription = $titleMeta['meta_description'];
 
         $breadcrumbs = [
             ['name' => 'Home', 'url' => route('home')],
@@ -67,6 +76,8 @@ class CityController extends Controller
             'breadcrumbs' => $breadcrumbs,
             'cityUrl' => $cityUrl,
             'generatedContent' => $generatedContent,
+            'title' => $title,
+            'meta_description' => $metaDescription,
         ]);
     }
 }

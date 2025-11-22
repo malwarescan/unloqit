@@ -3,17 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\City;
+use App\Models\GeneratedContent;
 use App\Models\Service;
 use App\Services\Schema\BreadcrumbSchema;
 use App\Services\Schema\LocalBusinessSchema;
 use App\Services\Schema\OrganizationSchema;
 use App\Services\Schema\ServiceSchema;
 use App\Services\Schema\WebPageSchema;
+use App\Services\TitleMetaService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CityServiceController extends Controller
 {
+    public function __construct(
+        private TitleMetaService $titleMeta
+    ) {}
+
     public function showClevelandService(string $serviceSlug): View
     {
         $city = City::where('slug', 'cleveland')->firstOrFail();
@@ -34,6 +40,17 @@ class CityServiceController extends Controller
         $cityUrl = $isCleveland ? route('cleveland.show') : route('city.show', ['city' => $city->slug]);
         $serviceUrl = $isCleveland ? route('cleveland.service.show', ['service' => $service->slug]) : route('city.service.show', ['city' => $city->slug, 'service' => $service->slug]);
 
+        // Check for generated content first, fallback to TitleMetaService
+        $generatedContent = GeneratedContent::where('content_type', 'service')
+            ->where('city_id', $city->id)
+            ->where('service_id', $service->id)
+            ->where('is_published', true)
+            ->first();
+
+        $titleMeta = $generatedContent 
+            ? ['title' => $generatedContent->title, 'meta_description' => $generatedContent->meta_description]
+            : $this->titleMeta->forCityService($city, $service);
+
         $breadcrumbs = [
             ['name' => 'Home', 'url' => route('home')],
             ['name' => "{$city->name} Locksmith", 'url' => $cityUrl],
@@ -45,9 +62,9 @@ class CityServiceController extends Controller
             LocalBusinessSchema::forCity($city),
             ServiceSchema::forServiceInCity($service, $city),
             WebPageSchema::generate(
-                "{$service->name} in {$city->name} | {$city->name} Locksmith | Unloqit",
+                $titleMeta['title'],
                 $serviceUrl,
-                "Professional {$service->name} services in {$city->name}, {$city->state}. Fast, reliable, and available 24/7."
+                $titleMeta['meta_description']
             ),
             BreadcrumbSchema::generate($breadcrumbs),
         ];
@@ -60,6 +77,8 @@ class CityServiceController extends Controller
             'jsonld' => $jsonld,
             'breadcrumbs' => $breadcrumbs,
             'serviceUrl' => $serviceUrl,
+            'title' => $titleMeta['title'],
+            'meta_description' => $titleMeta['meta_description'],
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\City;
+use App\Models\GeneratedContent;
 use App\Models\Neighborhood;
 use App\Models\Service;
 use App\Services\Schema\BreadcrumbSchema;
@@ -10,11 +11,16 @@ use App\Services\Schema\LocalBusinessSchema;
 use App\Services\Schema\OrganizationSchema;
 use App\Services\Schema\ServiceSchema;
 use App\Services\Schema\WebPageSchema;
+use App\Services\TitleMetaService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CityServiceNeighborhoodController extends Controller
 {
+    public function __construct(
+        private TitleMetaService $titleMeta
+    ) {}
+
     public function showClevelandServiceNeighborhood(string $serviceSlug, string $neighborhoodSlug): View
     {
         $city = City::where('slug', 'cleveland')->firstOrFail();
@@ -42,6 +48,18 @@ class CityServiceNeighborhoodController extends Controller
         $serviceUrl = $isCleveland ? route('cleveland.service.show', ['service' => $service->slug]) : route('city.service.show', ['city' => $city->slug, 'service' => $service->slug]);
         $neighborhoodUrl = $isCleveland ? route('cleveland.service.neighborhood.show', ['service' => $service->slug, 'neighborhood' => $neighborhood->slug]) : route('city.service.neighborhood.show', ['city' => $city->slug, 'service' => $service->slug, 'neighborhood' => $neighborhood->slug]);
 
+        // Check for generated content first, fallback to TitleMetaService
+        $generatedContent = GeneratedContent::where('content_type', 'neighborhood')
+            ->where('city_id', $city->id)
+            ->where('service_id', $service->id)
+            ->where('neighborhood_id', $neighborhood->id)
+            ->where('is_published', true)
+            ->first();
+
+        $titleMeta = $generatedContent 
+            ? ['title' => $generatedContent->title, 'meta_description' => $generatedContent->meta_description]
+            : $this->titleMeta->forNeighborhoodService($city, $service, $neighborhood);
+
         $breadcrumbs = [
             ['name' => 'Home', 'url' => route('home')],
             ['name' => "{$city->name} Locksmith", 'url' => $cityUrl],
@@ -54,9 +72,9 @@ class CityServiceNeighborhoodController extends Controller
             LocalBusinessSchema::forCity($city),
             ServiceSchema::forServiceInCity($service, $city),
             WebPageSchema::generate(
-                "{$service->name} in {$neighborhood->name}, {$city->name} | Unloqit",
+                $titleMeta['title'],
                 $neighborhoodUrl,
-                "Professional {$service->name} services in {$neighborhood->name}, {$city->name}, {$city->state}. Fast, reliable, and available 24/7."
+                $titleMeta['meta_description']
             ),
             BreadcrumbSchema::generate($breadcrumbs),
         ];
@@ -70,6 +88,8 @@ class CityServiceNeighborhoodController extends Controller
             'jsonld' => $jsonld,
             'breadcrumbs' => $breadcrumbs,
             'neighborhoodUrl' => $neighborhoodUrl,
+            'title' => $titleMeta['title'],
+            'meta_description' => $titleMeta['meta_description'],
         ]);
     }
 }

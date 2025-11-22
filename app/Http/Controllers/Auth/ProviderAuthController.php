@@ -7,6 +7,7 @@ use App\Models\City;
 use App\Models\Provider;
 use App\Models\ProviderAvailability;
 use App\Models\Service;
+use App\Services\TitleMetaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -15,14 +16,22 @@ use Illuminate\Http\RedirectResponse;
 
 class ProviderAuthController extends Controller
 {
+    public function __construct(
+        private TitleMetaService $titleMeta
+    ) {}
+
     /**
      * Show registration form
      */
     public function showRegisterForm(): View
     {
+        $titleMeta = $this->titleMeta->forProRegister();
+
         return view('marketplace.pro.register', [
             'cities' => City::all(),
             'services' => Service::all(),
+            'title' => $titleMeta['title'],
+            'meta_description' => $titleMeta['meta_description'],
         ]);
     }
 
@@ -86,7 +95,12 @@ class ProviderAuthController extends Controller
      */
     public function showLoginForm(): View
     {
-        return view('marketplace.pro.login');
+        $titleMeta = $this->titleMeta->forProLogin();
+
+        return view('marketplace.pro.login', [
+            'title' => $titleMeta['title'],
+            'meta_description' => $titleMeta['meta_description'],
+        ]);
     }
 
     /**

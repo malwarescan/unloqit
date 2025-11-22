@@ -6,6 +6,7 @@ use App\Models\City;
 use App\Models\Job;
 use App\Models\Service;
 use App\Services\DispatchService;
+use App\Services\TitleMetaService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -13,7 +14,8 @@ use Illuminate\Http\RedirectResponse;
 class RequestController extends Controller
 {
     public function __construct(
-        private DispatchService $dispatchService
+        private DispatchService $dispatchService,
+        private TitleMetaService $titleMeta
     ) {}
 
     /**
@@ -32,11 +34,15 @@ class RequestController extends Controller
             $service = Service::where('slug', $serviceSlug)->first();
         }
 
+        $titleMeta = $this->titleMeta->forRequest($city, $service);
+
         return view('marketplace.request', [
             'city' => $city,
             'service' => $service,
             'cities' => City::all(),
             'services' => Service::all(),
+            'title' => $titleMeta['title'],
+            'meta_description' => $titleMeta['meta_description'],
         ]);
     }
 

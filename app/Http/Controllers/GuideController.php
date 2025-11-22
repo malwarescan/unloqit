@@ -6,13 +6,20 @@ use App\Models\Guide;
 use App\Services\Schema\BreadcrumbSchema;
 use App\Services\Schema\OrganizationSchema;
 use App\Services\Schema\WebPageSchema;
+use App\Services\TitleMetaService;
 use Illuminate\View\View;
 
 class GuideController extends Controller
 {
+    public function __construct(
+        private TitleMetaService $titleMeta
+    ) {}
+
     public function show(string $slug): View
     {
         $guide = Guide::where('slug', $slug)->firstOrFail();
+
+        $titleMeta = $this->titleMeta->forGuide($guide->title);
 
         $breadcrumbs = [
             ['name' => 'Home', 'url' => route('home')],
@@ -22,9 +29,9 @@ class GuideController extends Controller
         $schema = [
             OrganizationSchema::base(),
             WebPageSchema::generate(
-                "{$guide->title} | Unloqit",
+                $titleMeta['title'],
                 route('guide.show', ['slug' => $guide->slug]),
-                strip_tags(substr($guide->content, 0, 160))
+                $titleMeta['meta_description']
             ),
             BreadcrumbSchema::generate($breadcrumbs),
         ];
@@ -35,6 +42,8 @@ class GuideController extends Controller
             'guide' => $guide,
             'jsonld' => $jsonld,
             'breadcrumbs' => $breadcrumbs,
+            'title' => $titleMeta['title'],
+            'meta_description' => $titleMeta['meta_description'],
         ]);
     }
 }
