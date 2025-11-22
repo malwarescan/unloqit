@@ -1,9 +1,11 @@
 [phases.setup]
-aptPkgs = ["php8.2-mysql", "php8.2-pdo", "php8.2-pdo_mysql"]
+aptPkgs = ["php8.2-mysql", "php8.2-pdo", "php8.2-pdo_mysql", "nodejs", "npm"]
 
 [phases.build]
 cmds = [
   "composer install --no-dev --optimize-autoloader --no-interaction",
+  "npm install",
+  "npm run build",
   "php artisan config:clear || true",
   "php artisan route:clear || true",
   "php artisan view:clear || true",
