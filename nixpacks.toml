@@ -1,0 +1,8 @@
+[phases.setup]
+aptPkgs = ["php8.2-mysql"]
+
+[phases.build]
+cmds = ["composer install --no-dev --optimize-autoloader"]
+
+[start]
+cmd = "php -d variables_order=EGPCS -S 0.0.0.0:${PORT} -t public"
