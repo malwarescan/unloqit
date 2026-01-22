@@ -55,7 +55,11 @@
             <h2 class="font-display font-black text-5xl md:text-6xl mb-4 text-brand-dark tracking-tight">Our Services</h2>
             <div class="w-24 h-1 bg-brand-accent mx-auto"></div>
         </div>
-        @if(isset($services) && $services->count() > 0)
+        @php
+            $servicesList = $services ?? collect([]);
+            $hasServices = $servicesList->count() > 0;
+        @endphp
+        @if($hasServices)
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @foreach($services as $index => $service)
             <div class="service-card p-8">
