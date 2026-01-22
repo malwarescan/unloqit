@@ -48,48 +48,6 @@
     </div>
 </section>
 
-<!-- Services Grid -->
-<section class="atmospheric-surface py-24 relative">
-    <div class="container mx-auto px-6 relative z-10">
-        <div class="text-center mb-16 section-reveal">
-            <h2 class="font-display font-black text-5xl md:text-6xl mb-4 text-brand-dark tracking-tight">Our Services</h2>
-            <div class="w-24 h-1 bg-brand-accent mx-auto"></div>
-        </div>
-        @php
-            // Debug: Force services to be a collection
-            $servicesList = $services ?? collect([]);
-            if (!($servicesList instanceof \Illuminate\Support\Collection)) {
-                $servicesList = collect($servicesList ?? []);
-            }
-        @endphp
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @forelse($servicesList as $index => $service)
-            <div class="service-card p-8">
-                <h3 class="font-display font-bold text-2xl mb-4 text-brand-dark tracking-tight uppercase">
-                    <a href="{{ route('services.show', ['service' => $service->slug]) }}" class="text-brand-dark hover:text-brand-accent transition-colors duration-300">
-                        {{ $service->name }}
-                    </a>
-                </h3>
-                <p class="text-brand-dark-60 mb-6 leading-relaxed">{{ $service->description ?? 'Professional ' . strtolower($service->name) . ' services available nationwide through the Unloqit marketplace.' }}</p>
-                <a href="{{ route('services.show', ['service' => $service->slug]) }}" class="inline-flex items-center text-brand-accent font-bold hover:text-brand-accent-80 transition-colors duration-300 group">
-                    <span class="mr-2">Learn more</span>
-                    <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                    </svg>
-                </a>
-            </div>
-            @empty
-            <div class="col-span-full text-center py-12">
-                <p class="text-brand-dark-60 text-lg">Services are being loaded. Please check back shortly.</p>
-                <a href="{{ route('services.index') }}" class="inline-block mt-4 text-brand-accent font-bold hover:text-brand-accent-80 transition-colors duration-300">
-                    View All Services →
-                </a>
-            </div>
-            @endforelse
-        </div>
-    </div>
-</section>
-
 <!-- How It Works -->
 <section class="industrial-bg py-24 relative">
     <div class="container mx-auto px-6 relative z-10">
