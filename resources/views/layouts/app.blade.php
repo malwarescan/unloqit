@@ -19,12 +19,19 @@
     @yield('meta_extra')
     
     @php
+        // Check for manifest first
         $manifestPath = public_path('build/manifest.json');
         if (file_exists($manifestPath)) {
             try {
-                @vite(['resources/css/app.css', 'resources/js/app.js']);
+                $manifest = json_decode(file_get_contents($manifestPath), true);
+                if (isset($manifest['resources/css/app.css']['file'])) {
+                    echo '<link rel="stylesheet" href="' . asset('build/' . $manifest['resources/css/app.css']['file']) . '">';
+                }
+                if (isset($manifest['resources/js/app.js']['file'])) {
+                    echo '<script src="' . asset('build/' . $manifest['resources/js/app.js']['file']) . '"></script>';
+                }
             } catch (\Exception $e) {
-                // Fallback to direct asset links if Vite fails
+                // Fallback to glob if manifest parsing fails
                 $assets = glob(public_path('build/assets/app-*.css'));
                 $jsAssets = glob(public_path('build/assets/app-*.js'));
                 if (!empty($assets)) {
@@ -35,7 +42,7 @@
                 }
             }
         } else {
-            // No manifest - try to find assets directly
+            // No manifest - find assets directly
             $assets = glob(public_path('build/assets/app-*.css'));
             $jsAssets = glob(public_path('build/assets/app-*.js'));
             if (!empty($assets)) {
