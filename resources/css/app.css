@@ -151,15 +151,17 @@
     }
     
     .section-reveal {
-        opacity: 0;
-        transform: translateY(30px);
-        animation: fadeInUp 0.8s ease-out forwards;
+        /* Content visible by default - animation is optional enhancement */
+        opacity: 1;
+        transform: translateY(0);
     }
     
-    .section-reveal:nth-child(1) { animation-delay: 0.1s; }
-    .section-reveal:nth-child(2) { animation-delay: 0.2s; }
-    .section-reveal:nth-child(3) { animation-delay: 0.3s; }
-    .section-reveal:nth-child(4) { animation-delay: 0.4s; }
+    /* Optional: Add animation if JavaScript is enabled and prefers reduced motion is off */
+    @media (prefers-reduced-motion: no-preference) {
+        .section-reveal {
+            animation: fadeInUp 0.8s ease-out;
+        }
+    }
     
     @keyframes fadeInUp {
         from {
