@@ -13,17 +13,22 @@ class IndexabilityGate
     /**
      * Minimum number of providers required for city page to be indexable
      */
-    private const MIN_PROVIDERS_FOR_CITY = 3;
+    private const MIN_PROVIDERS_CITY = 3;
 
     /**
      * Minimum number of providers required for city-service page to be indexable
      */
-    private const MIN_PROVIDERS_FOR_CITY_SERVICE = 3;
+    private const MIN_PROVIDERS_CITY_SERVICE = 2;
 
     /**
-     * Minimum number of completed jobs required as alternative proof
+     * Minimum number of completed jobs required for city (alternative proof)
      */
-    private const MIN_COMPLETED_JOBS = 5;
+    private const MIN_JOBS_CITY = 15;
+
+    /**
+     * Minimum number of completed jobs required for neighborhood
+     */
+    private const MIN_JOBS_NEIGHBORHOOD = 10;
 
     /**
      * Check if a city page should be indexable
@@ -39,7 +44,7 @@ class IndexabilityGate
             })
             ->count();
 
-        if ($providerCount >= self::MIN_PROVIDERS_FOR_CITY) {
+        if ($providerCount >= self::MIN_PROVIDERS_CITY) {
             return true;
         }
 
@@ -49,7 +54,7 @@ class IndexabilityGate
             ->where('completed_at', '>=', now()->subDays(90))
             ->count();
 
-        return $completedJobsCount >= self::MIN_COMPLETED_JOBS;
+        return $completedJobsCount >= self::MIN_JOBS_CITY;
     }
 
     /**
@@ -67,18 +72,13 @@ class IndexabilityGate
             })
             ->count();
 
-        if ($providerCount >= self::MIN_PROVIDERS_FOR_CITY_SERVICE) {
+        if ($providerCount >= self::MIN_PROVIDERS_CITY_SERVICE) {
             return true;
         }
 
-        // Alternative: Check for recent completed jobs for this service in this city
-        $completedJobsCount = Job::where('city_id', $city->id)
-            ->where('service_id', $service->id)
-            ->where('status', 'completed')
-            ->where('completed_at', '>=', now()->subDays(90))
-            ->count();
-
-        return $completedJobsCount >= self::MIN_COMPLETED_JOBS;
+        // City-service pages require both city gate AND service-specific proof
+        // (No alternative job count - must have providers)
+        return false;
     }
 
     /**
@@ -99,8 +99,8 @@ class IndexabilityGate
             ->where('completed_at', '>=', now()->subDays(180))
             ->count();
 
-        // Require at least 2 completed jobs in this neighborhood
-        return $neighborhoodJobsCount >= 2;
+        // Require at least MIN_JOBS_NEIGHBORHOOD completed jobs in this neighborhood
+        return $neighborhoodJobsCount >= self::MIN_JOBS_NEIGHBORHOOD;
     }
 
     /**

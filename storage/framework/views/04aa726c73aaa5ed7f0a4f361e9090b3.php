@@ -36,7 +36,7 @@
             </p>
             <div class="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in-up" style="animation-delay: 0.4s;">
                 <a href="<?php echo e(route('request.show.context', ['city' => 'cleveland', 'service' => 'car-lockout'])); ?>" class="emergency-button">
-                    Request Lock Pro Now
+                    Request Unloqit Pro Now
                 </a>
                 <a href="<?php echo e(route('cleveland.show')); ?>" class="px-8 py-4 bg-transparent border-2 border-brand-white text-brand-white font-display font-bold text-lg tracking-wide uppercase hover:bg-brand-white hover:text-brand-dark transition-all duration-300">
                     View Services
@@ -152,11 +152,11 @@
             </div>
             <div class="bg-brand-dark border-l-4 border-brand-accent p-8 section-reveal" style="animation-delay: 0.2s;">
                 <h3 class="font-display font-bold text-xl mb-3 text-brand-white tracking-tight uppercase">Do you work on all car makes and models?</h3>
-                <p class="text-brand-gray leading-relaxed">Yes, our locksmiths are trained to work on all vehicle types, including modern keyless entry systems.</p>
+                <p class="text-brand-gray leading-relaxed">Yes, Unloqit Pro Service Providers on the platform are trained to work on all vehicle types, including modern keyless entry systems.</p>
             </div>
             <div class="bg-brand-dark border-l-4 border-brand-accent p-8 section-reveal" style="animation-delay: 0.4s;">
-                <h3 class="font-display font-bold text-xl mb-3 text-brand-white tracking-tight uppercase">Are your locksmiths licensed and insured?</h3>
-                <p class="text-brand-gray leading-relaxed">All Unloqit locksmiths are fully licensed, bonded, and insured for your protection.</p>
+                <h3 class="font-display font-bold text-xl mb-3 text-brand-white tracking-tight uppercase">Are Unloqit Pro Service Providers licensed and insured?</h3>
+                <p class="text-brand-gray leading-relaxed">All Unloqit Pro Service Providers are verified: fully licensed, bonded, and insured. We verify credentials before activation.</p>
             </div>
         </div>
         <div class="text-center mt-12 section-reveal" style="animation-delay: 0.6s;">

@@ -2,12 +2,15 @@
 
 @section('title', $title ?? ($service->name . ' in ' . $city->name . ' | ' . $city->name . ' Locksmith | Unloqit'))
 @section('meta_description', $meta_description ?? ('Professional ' . $service->name . ' services in ' . $city->name . ', ' . $city->state . '. Fast, reliable, and available 24/7.'))
-@section('canonical', $serviceUrl ?? ($city->slug === 'cleveland' ? route('cleveland.service.show', ['service' => $service->slug]) : route('city.service.show', ['city' => $city->slug, 'service' => $service->slug])))
+@section('canonical', $serviceUrl ?? route('city.service.show', ['state' => strtolower($city->state), 'city' => $city->slug, 'service' => $service->slug]))
 
 @section('meta_extra')
+@if(!($isIndexable ?? true))
+<meta name="robots" content="noindex,follow">
+@endif
 <meta property="og:title" content="{{ $service->name }} in {{ $city->name }} | Unloqit">
 <meta property="og:description" content="Professional {{ $service->name }} services in {{ $city->name }}, {{ $city->state }}. Fast, reliable, and available 24/7.">
-<meta property="og:url" content="{{ $serviceUrl ?? ($city->slug === 'cleveland' ? route('cleveland.service.show', ['service' => $service->slug]) : route('city.service.show', ['city' => $city->slug, 'service' => $service->slug])) }}">
+<meta property="og:url" content="{{ $serviceUrl }}">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $service->name }} in {{ $city->name }} | Unloqit">

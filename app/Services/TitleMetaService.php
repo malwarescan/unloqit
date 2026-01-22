@@ -13,8 +13,8 @@ class TitleMetaService
      */
     public function forCity(City $city): array
     {
-        $title = "Locksmith in {$city->name} – Fast, Verified Pros | Unloqit";
-        $meta = "Locked out in {$city->name}? Get matched with verified locksmith pros in minutes. Unloqit connects you to nearby experts who claim your job instantly.";
+        $title = "Locksmith in {$city->name}, {$city->state} | Unloqit";
+        $meta = "Locked out in {$city->name}, {$city->state}? Get matched with verified locksmith pros in minutes. Unloqit connects you to nearby experts who claim your job instantly.";
 
         return [
             'title' => $this->truncateTitle($title),
@@ -29,12 +29,13 @@ class TitleMetaService
     {
         $serviceName = $service->name;
         $cityName = $city->name;
+        $state = $city->state;
         
         // Service-specific title variations
-        $title = "{$serviceName} in {$cityName} – Fast, Verified Pros | Unloqit";
+        $title = "{$serviceName} in {$cityName}, {$state} | Unloqit";
         
         // Service-specific meta variations
-        $meta = "Need {$serviceName} in {$cityName}? Get matched with verified locksmith pros in minutes. Pros claim your job instantly. 24/7 availability.";
+        $meta = "Need {$serviceName} in {$cityName}, {$state}? Get matched with verified locksmith pros in minutes. Pros claim your job instantly. 24/7 availability.";
 
         return [
             'title' => $this->truncateTitle($title),
@@ -61,12 +62,54 @@ class TitleMetaService
     }
 
     /**
-     * Generate title and meta for homepage
+     * Generate title and meta for homepage (nationwide)
      */
     public function forHome(): array
     {
-        $title = "Locksmith in Cleveland – Fast, Verified Pros | Unloqit";
-        $meta = "Locked out? Get matched with verified locksmith pros in minutes. Unloqit connects you to nearby experts who claim your job instantly. 24/7.";
+        $title = "Unloqit | 24/7 Locksmith Dispatch Marketplace";
+        $meta = "Nationwide locksmith marketplace. Get matched with verified locksmith professionals in minutes. Real-time tracking, transparent pricing, 24/7 availability.";
+
+        return [
+            'title' => $this->truncateTitle($title),
+            'meta_description' => $this->truncateMeta($meta),
+        ];
+    }
+
+    /**
+     * Generate title and meta for services directory
+     */
+    public function forServicesDirectory(): array
+    {
+        $title = "Locksmith Services | Unloqit";
+        $meta = "Browse all locksmith services available through Unloqit. Car lockouts, house lockouts, rekeying, key programming, and more. 24/7 availability.";
+
+        return [
+            'title' => $this->truncateTitle($title),
+            'meta_description' => $this->truncateMeta($meta),
+        ];
+    }
+
+    /**
+     * Generate title and meta for service page
+     */
+    public function forServicePage(Service $service): array
+    {
+        $title = "{$service->name} | 24/7 Locksmith Service | Unloqit";
+        $meta = "{$service->name} available nationwide. Get matched with verified locksmith professionals instantly. Real-time tracking, transparent pricing, 24/7.";
+
+        return [
+            'title' => $this->truncateTitle($title),
+            'meta_description' => $this->truncateMeta($meta),
+        ];
+    }
+
+    /**
+     * Generate title and meta for locations directory
+     */
+    public function forLocationsDirectory(): array
+    {
+        $title = "Locations We Serve | Unloqit";
+        $meta = "Find locksmith services in your city. Unloqit connects you with verified locksmith professionals across multiple locations. Browse covered cities.";
 
         return [
             'title' => $this->truncateTitle($title),

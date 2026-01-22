@@ -2,12 +2,15 @@
 
 @section('title', $title ?? ($service->name . ' in ' . $neighborhood->name . ', ' . $city->name . ' | Unloqit'))
 @section('meta_description', $meta_description ?? ('Professional ' . $service->name . ' services in ' . $neighborhood->name . ', ' . $city->name . ', ' . $city->state . '. Fast, reliable, and available 24/7.'))
-@section('canonical', $neighborhoodUrl ?? ($city->slug === 'cleveland' ? route('cleveland.service.neighborhood.show', ['service' => $service->slug, 'neighborhood' => $neighborhood->slug]) : route('city.service.neighborhood.show', ['city' => $city->slug, 'service' => $service->slug, 'neighborhood' => $neighborhood->slug])))
+@section('canonical', $neighborhoodUrl ?? route('city.service.neighborhood.show', ['state' => strtolower($city->state), 'city' => $city->slug, 'service' => $service->slug, 'neighborhood' => $neighborhood->slug]))
 
 @section('meta_extra')
+@if(!($isIndexable ?? true))
+<meta name="robots" content="noindex,follow">
+@endif
 <meta property="og:title" content="{{ $service->name }} in {{ $neighborhood->name }}, {{ $city->name }} | Unloqit">
 <meta property="og:description" content="Professional {{ $service->name }} services in {{ $neighborhood->name }}, {{ $city->name }}, {{ $city->state }}.">
-<meta property="og:url" content="{{ $neighborhoodUrl ?? ($city->slug === 'cleveland' ? route('cleveland.service.neighborhood.show', ['service' => $service->slug, 'neighborhood' => $neighborhood->slug]) : route('city.service.neighborhood.show', ['city' => $city->slug, 'service' => $service->slug, 'neighborhood' => $neighborhood->slug])) }}">
+<meta property="og:url" content="{{ $neighborhoodUrl }}">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $service->name }} in {{ $neighborhood->name }} | Unloqit">

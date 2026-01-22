@@ -24,29 +24,24 @@ class CityController extends Controller
         private PageDataService $pageData
     ) {}
 
-    public function showCleveland(): View
+    /**
+     * Show city page using new canonical structure: /locksmith/{state}/{city}
+     */
+    public function show(string $state, string $citySlug): View
     {
-        $city = City::where('slug', 'cleveland')->firstOrFail();
-        return $this->showCity($city);
-    }
+        // Normalize state to uppercase for lookup
+        $stateUpper = strtoupper($state);
+        
+        $city = City::where('slug', $citySlug)
+            ->where('state', $stateUpper)
+            ->firstOrFail();
 
-    public function show(string $citySlug): View
-    {
-        $city = City::where('slug', $citySlug)->firstOrFail();
-        return $this->showCity($city);
-    }
-
-    private function showCity(City $city): View
-    {
-        // Check indexability - return 404 if not indexable
-        if (!$this->indexabilityGate->isCityIndexable($city)) {
-            abort(404);
-        }
+        // Check indexability - return 200 with noindex if not indexable
+        $isIndexable = $this->indexabilityGate->isCityIndexable($city);
 
         $services = Service::all();
         
-        $isCleveland = $city->slug === 'cleveland';
-        $cityUrl = $isCleveland ? route('cleveland.show') : route('city.show', ['city' => $city->slug]);
+        $cityUrl = route('city.show', ['state' => strtolower($city->state), 'city' => $city->slug]);
 
         // Get real coverage data
         $coverageData = $this->pageData->getCityCoverageData($city);
@@ -66,6 +61,7 @@ class CityController extends Controller
 
         $breadcrumbs = [
             ['name' => 'Home', 'url' => route('home')],
+            ['name' => 'Locations', 'url' => route('locations.index')],
             ['name' => "{$city->name} Locksmith", 'url' => $cityUrl],
         ];
 
@@ -91,7 +87,7 @@ class CityController extends Controller
             'title' => $title,
             'meta_description' => $metaDescription,
             'coverageData' => $coverageData,
-            'isIndexable' => true,
+            'isIndexable' => $isIndexable,
         ]);
     }
 }

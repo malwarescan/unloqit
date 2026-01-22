@@ -18,41 +18,61 @@ class SitemapController extends Controller
 
     public function index(): Response
     {
+        $baseUrl = 'https://www.unloqit.com';
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
-        $xml .= '  <sitemap><loc>https://unloqit.com/sitemap-cities.xml</loc></sitemap>' . "\n";
-        $xml .= '  <sitemap><loc>https://unloqit.com/sitemap-services.xml</loc></sitemap>' . "\n";
-        $xml .= '  <sitemap><loc>https://unloqit.com/sitemap-guides.xml</loc></sitemap>' . "\n";
-        $xml .= '  <sitemap><loc>https://unloqit.com/sitemap-faq.xml</loc></sitemap>' . "\n";
+        $xml .= '  <sitemap><loc>' . $baseUrl . '/sitemap-services.xml</loc></sitemap>' . "\n";
+        $xml .= '  <sitemap><loc>' . $baseUrl . '/sitemap-locations.xml</loc></sitemap>' . "\n";
+        $xml .= '  <sitemap><loc>' . $baseUrl . '/sitemap-city-services.xml</loc></sitemap>' . "\n";
+        $xml .= '  <sitemap><loc>' . $baseUrl . '/sitemap-guides.xml</loc></sitemap>' . "\n";
+        $xml .= '  <sitemap><loc>' . $baseUrl . '/sitemap-faq.xml</loc></sitemap>' . "\n";
         $xml .= '</sitemapindex>';
 
         return response($xml, 200)->header('Content-Type', 'application/xml');
     }
 
-    public function cities(): Response
+    /**
+     * Services sitemap: /services and /services/{service}
+     */
+    public function services(): Response
     {
-        $cities = City::all();
-        $baseUrl = 'https://unloqit.com';
+        $services = Service::all();
+        $baseUrl = 'https://www.unloqit.com';
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
         
-        // Homepage (always indexable)
-        $xml .= '  <url><loc>' . $baseUrl . '/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>' . "\n";
+        // Services directory
+        $xml .= '  <url><loc>' . $baseUrl . '/services</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>' . "\n";
         
-        // Cleveland special route (only if indexable)
-        $cleveland = City::where('slug', 'cleveland')->first();
-        if ($cleveland && $this->indexabilityGate->isCityIndexable($cleveland)) {
-            $xml .= '  <url><loc>' . $baseUrl . '/cleveland-locksmith</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>' . "\n";
+        // Individual service pages
+        foreach ($services as $service) {
+            $xml .= '  <url><loc>' . $baseUrl . '/services/' . $service->slug . '</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>' . "\n";
         }
         
-        // City pages (only indexable ones)
+        $xml .= '</urlset>';
+
+        return response($xml, 200)->header('Content-Type', 'application/xml');
+    }
+
+    /**
+     * Locations sitemap: /locations and eligible city pages
+     */
+    public function locations(): Response
+    {
+        $cities = City::all();
+        $baseUrl = 'https://www.unloqit.com';
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        
+        // Locations directory
+        $xml .= '  <url><loc>' . $baseUrl . '/locations</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>' . "\n";
+        
+        // City pages (only indexable ones, using new canonical structure)
         foreach ($cities as $city) {
             if ($this->indexabilityGate->isCityIndexable($city)) {
-                // Only include standard route, not both cleveland routes
-                if ($city->slug !== 'cleveland') {
-                    $xml .= '  <url><loc>' . $baseUrl . '/locksmith/' . $city->slug . '</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>' . "\n";
-                }
+                $xml .= '  <url><loc>' . $baseUrl . '/locksmith/' . strtolower($city->state) . '/' . $city->slug . '</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>' . "\n";
             }
         }
         
@@ -61,58 +81,37 @@ class SitemapController extends Controller
         return response($xml, 200)->header('Content-Type', 'application/xml');
     }
 
-    public function services(): Response
+    /**
+     * City-services sitemap: eligible city-service pages only
+     */
+    public function cityServices(): Response
     {
         $cities = City::all();
         $services = Service::all();
-        $baseUrl = 'https://unloqit.com';
+        $baseUrl = 'https://www.unloqit.com';
         $urlCount = 0;
-        $maxUrls = 50000; // Google's limit
+        $maxUrls = 50000;
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
         
         foreach ($cities as $city) {
-            // Skip if city not indexable
             if (!$this->indexabilityGate->isCityIndexable($city)) {
                 continue;
             }
 
             foreach ($services as $service) {
-                // Skip if city-service not indexable
+                if ($urlCount >= $maxUrls) {
+                    break 2;
+                }
+
                 if (!$this->indexabilityGate->isCityServiceIndexable($city, $service)) {
                     continue;
                 }
 
-                // Only include Cleveland special route (canonical), not both
-                if ($city->slug === 'cleveland') {
-                    $xml .= '  <url><loc>' . $baseUrl . '/cleveland-locksmith/' . $service->slug . '</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>' . "\n";
-                    $urlCount++;
-                } else {
-                    // Standard routes for other cities
-                    $xml .= '  <url><loc>' . $baseUrl . '/locksmith/' . $city->slug . '/' . $service->slug . '</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>' . "\n";
-                    $urlCount++;
-                }
-                
-                // Neighborhood pages (only indexable ones)
-                foreach ($city->neighborhoods as $neighborhood) {
-                    if ($urlCount >= $maxUrls) {
-                        break 3; // Break out of all loops
-                    }
-
-                    if (!$this->indexabilityGate->isNeighborhoodServiceIndexable($city, $service, $neighborhood)) {
-                        continue;
-                    }
-
-                    // Only include Cleveland special route
-                    if ($city->slug === 'cleveland') {
-                        $xml .= '  <url><loc>' . $baseUrl . '/cleveland-locksmith/' . $service->slug . '/' . $neighborhood->slug . '</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>' . "\n";
-                        $urlCount++;
-                    } else {
-                        $xml .= '  <url><loc>' . $baseUrl . '/locksmith/' . $city->slug . '/' . $service->slug . '/' . $neighborhood->slug . '</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>' . "\n";
-                        $urlCount++;
-                    }
-                }
+                // New canonical structure: /locksmith/{state}/{city}/{service}
+                $xml .= '  <url><loc>' . $baseUrl . '/locksmith/' . strtolower($city->state) . '/' . $city->slug . '/' . $service->slug . '</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>' . "\n";
+                $urlCount++;
             }
         }
         
@@ -121,10 +120,11 @@ class SitemapController extends Controller
         return response($xml, 200)->header('Content-Type', 'application/xml');
     }
 
+
     public function guides(): Response
     {
         $guides = Guide::all();
-        $baseUrl = 'https://unloqit.com';
+        $baseUrl = 'https://www.unloqit.com';
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
@@ -141,7 +141,7 @@ class SitemapController extends Controller
     public function faq(): Response
     {
         $faqs = Faq::all();
-        $baseUrl = 'https://unloqit.com';
+        $baseUrl = 'https://www.unloqit.com';
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";

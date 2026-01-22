@@ -2,12 +2,15 @@
 
 @section('title', $title ?? ($city->name . ' Locksmith | 24/7 Lockout & Car Keys | Unloqit'))
 @section('meta_description', $meta_description ?? ('Reliable 24/7 locksmith services in ' . $city->name . ', ' . $city->state . '. Car lockouts, rekeys, key programming, residential & commercial. Fast arrival times.'))
-@section('canonical', $cityUrl ?? ($city->slug === 'cleveland' ? route('cleveland.show') : route('city.show', ['city' => $city->slug])))
+@section('canonical', $cityUrl ?? route('city.show', ['state' => strtolower($city->state), 'city' => $city->slug]))
 
 @section('meta_extra')
+@if(!($isIndexable ?? true))
+<meta name="robots" content="noindex,follow">
+@endif
 <meta property="og:title" content="{{ $city->name }} Locksmith | 24/7 Lockout & Car Keys | Unloqit">
 <meta property="og:description" content="Reliable 24/7 locksmith services in {{ $city->name }}, {{ $city->state }}. Car lockouts, rekeys, key programming, residential & commercial.">
-<meta property="og:url" content="{{ $cityUrl ?? ($city->slug === 'cleveland' ? route('cleveland.show') : route('city.show', ['city' => $city->slug])) }}">
+<meta property="og:url" content="{{ $cityUrl }}">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $city->name }} Locksmith | Unloqit">

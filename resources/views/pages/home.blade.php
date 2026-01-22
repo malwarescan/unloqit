@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
-@section('title', $title ?? 'Unloqit - 24/7 Locksmith Services in Cleveland, Ohio')
-@section('meta_description', $meta_description ?? 'Reliable 24/7 locksmith services in Cleveland. Car lockouts, rekeys, key programming, residential & commercial. Fast arrival times.')
+@section('title', $title ?? 'Unloqit | 24/7 Locksmith Dispatch Marketplace')
+@section('meta_description', $meta_description ?? 'Nationwide locksmith marketplace. Get matched with verified locksmith professionals in minutes. Real-time tracking, transparent pricing, 24/7 availability.')
 @section('canonical', route('home'))
 
 @section('meta_extra')
-<meta property="og:title" content="Unloqit - 24/7 Locksmith Services in Cleveland, Ohio">
-<meta property="og:description" content="Reliable 24/7 locksmith services in Cleveland. Car lockouts, rekeys, key programming, residential & commercial. Fast arrival times.">
+<meta property="og:title" content="Unloqit | 24/7 Locksmith Dispatch Marketplace">
+<meta property="og:description" content="Nationwide locksmith marketplace. Get matched with verified locksmith professionals in minutes. Real-time tracking, transparent pricing, 24/7 availability.">
 <meta property="og:url" content="{{ route('home') }}">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Unloqit - 24/7 Locksmith Services in Cleveland, Ohio">
-<meta name="twitter:description" content="Reliable 24/7 locksmith services in Cleveland. Car lockouts, rekeys, key programming, residential & commercial. Fast arrival times.">
+<meta name="twitter:title" content="Unloqit | 24/7 Locksmith Dispatch Marketplace">
+<meta name="twitter:description" content="Nationwide locksmith marketplace. Get matched with verified locksmith professionals in minutes. Real-time tracking, transparent pricing, 24/7 availability.">
 @endsection
 
 @section('jsonld')
@@ -31,17 +31,17 @@
                 <span class="inline-block px-4 py-2 bg-brand-accent text-brand-white font-display font-bold text-sm tracking-widest uppercase">24/7 Emergency Service</span>
             </div>
             <h1 class="font-display font-black text-7xl md:text-8xl mb-8 tracking-tight text-shadow-lg animate-fade-in-up" style="line-height: 0.95;">
-                24/7<br>Locksmith<br><span class="text-brand-accent">Cleveland</span>
+                24/7<br>Locksmith<br><span class="text-brand-accent">Marketplace</span>
             </h1>
             <p class="text-xl md:text-2xl mb-12 text-brand-gray font-medium max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style="animation-delay: 0.2s;">
-                Precision locksmith services when you need them most. Fast response. Professional expertise. Available around the clock.
+                Connect with verified locksmith professionals nationwide. Real-time matching. Transparent pricing. Available around the clock.
             </p>
             <div class="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in-up" style="animation-delay: 0.4s;">
-                <a href="{{ route('request.show.context', ['city' => 'cleveland', 'service' => 'car-lockout']) }}" class="emergency-button">
+                <a href="{{ route('request.show') }}" class="emergency-button">
                     Request Unloqit Pro Now
                 </a>
-                <a href="{{ route('cleveland.show') }}" class="px-8 py-4 bg-transparent border-2 border-brand-white text-brand-white font-display font-bold text-lg tracking-wide uppercase hover:bg-brand-white hover:text-brand-dark transition-all duration-300">
-                    View Services
+                <a href="{{ route('locations.index') }}" class="px-8 py-4 bg-transparent border-2 border-brand-white text-brand-white font-display font-bold text-lg tracking-wide uppercase hover:bg-brand-white hover:text-brand-dark transition-all duration-300">
+                    View Locations
                 </a>
             </div>
         </div>
@@ -59,12 +59,12 @@
             @foreach($services as $index => $service)
             <div class="service-card p-8 section-reveal" style="animation-delay: {{ ($index + 1) * 0.1 }}s;">
                 <h3 class="font-display font-bold text-2xl mb-4 text-brand-dark tracking-tight uppercase">
-                    <a href="{{ route('cleveland.service.show', ['service' => $service->slug]) }}" class="text-brand-dark hover:text-brand-accent transition-colors duration-300">
+                    <a href="{{ route('services.show', ['service' => $service->slug]) }}" class="text-brand-dark hover:text-brand-accent transition-colors duration-300">
                         {{ $service->name }}
                     </a>
                 </h3>
                 <p class="text-brand-dark-60 mb-6 leading-relaxed">{{ $service->description }}</p>
-                <a href="{{ route('cleveland.service.show', ['service' => $service->slug]) }}" class="inline-flex items-center text-brand-accent font-bold hover:text-brand-accent-80 transition-colors duration-300 group">
+                <a href="{{ route('services.show', ['service' => $service->slug]) }}" class="inline-flex items-center text-brand-accent font-bold hover:text-brand-accent-80 transition-colors duration-300 group">
                     <span class="mr-2">Learn more</span>
                     <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -76,25 +76,38 @@
     </div>
 </section>
 
-<!-- City Intro -->
-@if($city)
+<!-- How It Works -->
 <section class="industrial-bg py-24 relative">
     <div class="container mx-auto px-6 relative z-10">
         <div class="max-w-4xl mx-auto text-center section-reveal">
             <h2 class="font-display font-black text-5xl md:text-6xl mb-6 text-brand-white tracking-tight">
-                Serving {{ $city->name }}, {{ $city->state }}
+                How It Works
             </h2>
-            <p class="text-xl text-brand-gray mb-10 leading-relaxed max-w-2xl mx-auto">
-                Unloqit provides professional locksmith services throughout {{ $city->name }} and surrounding areas. 
-                Whether you have an unloqit car, unloqit house, or need lock installation, our vetted locksmiths are ready to help 24/7.
-            </p>
-            <a href="{{ route('cleveland.show') }}" class="emergency-button inline-block">
-                View All {{ $city->name }} Services
-            </a>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mt-12">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-brand-accent rounded-full flex items-center justify-center mx-auto mb-4 text-brand-white font-display font-bold text-2xl">1</div>
+                    <h3 class="font-display font-bold text-lg text-brand-white mb-2 uppercase">Request</h3>
+                    <p class="text-brand-gray text-sm">Submit your locksmith request with location and service needed.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-brand-accent rounded-full flex items-center justify-center mx-auto mb-4 text-brand-white font-display font-bold text-2xl">2</div>
+                    <h3 class="font-display font-bold text-lg text-brand-white mb-2 uppercase">Match</h3>
+                    <p class="text-brand-gray text-sm">Get matched with verified pros in your area instantly.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-brand-accent rounded-full flex items-center justify-center mx-auto mb-4 text-brand-white font-display font-bold text-2xl">3</div>
+                    <h3 class="font-display font-bold text-lg text-brand-white mb-2 uppercase">Track</h3>
+                    <p class="text-brand-gray text-sm">Follow your pro's progress in real-time from dispatch to arrival.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-brand-accent rounded-full flex items-center justify-center mx-auto mb-4 text-brand-white font-display font-bold text-2xl">4</div>
+                    <h3 class="font-display font-bold text-lg text-brand-white mb-2 uppercase">Complete</h3>
+                    <p class="text-brand-gray text-sm">Transparent pricing. Professional service. Job done.</p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
-@endif
 
 <!-- Customer Assurance -->
 <section class="atmospheric-surface py-24 relative">
@@ -148,7 +161,7 @@
         <div class="max-w-3xl mx-auto space-y-6">
             <div class="bg-brand-dark border-l-4 border-brand-accent p-8 section-reveal">
                 <h3 class="font-display font-bold text-xl mb-3 text-brand-white tracking-tight uppercase">How quickly can a locksmith arrive?</h3>
-                <p class="text-brand-gray leading-relaxed">Our average response time in Cleveland is 20-30 minutes, depending on your location and traffic conditions.</p>
+                <p class="text-brand-gray leading-relaxed">Response times vary by location and traffic conditions. Unloqit Pro Service Providers typically arrive within 20-45 minutes of job claim, depending on your area.</p>
             </div>
             <div class="bg-brand-dark border-l-4 border-brand-accent p-8 section-reveal" style="animation-delay: 0.2s;">
                 <h3 class="font-display font-bold text-xl mb-3 text-brand-white tracking-tight uppercase">Do you work on all car makes and models?</h3>

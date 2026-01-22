@@ -25,37 +25,33 @@ class CityServiceNeighborhoodController extends Controller
         private PageDataService $pageData
     ) {}
 
-    public function showClevelandServiceNeighborhood(string $serviceSlug, string $neighborhoodSlug): View
+    /**
+     * Show neighborhood-service page using new canonical structure: /locksmith/{state}/{city}/{service}/{neighborhood}
+     */
+    public function show(string $state, string $citySlug, string $serviceSlug, string $neighborhoodSlug): View
     {
-        $city = City::where('slug', 'cleveland')->firstOrFail();
+        // Normalize state to uppercase for lookup
+        $stateUpper = strtoupper($state);
+        
+        $city = City::where('slug', $citySlug)
+            ->where('state', $stateUpper)
+            ->firstOrFail();
         $service = Service::where('slug', $serviceSlug)->firstOrFail();
         $neighborhood = Neighborhood::where('city_id', $city->id)
             ->where('slug', $neighborhoodSlug)
             ->firstOrFail();
-        return $this->showServiceNeighborhood($city, $service, $neighborhood);
-    }
-
-    public function show(string $citySlug, string $serviceSlug, string $neighborhoodSlug): View
-    {
-        $city = City::where('slug', $citySlug)->firstOrFail();
-        $service = Service::where('slug', $serviceSlug)->firstOrFail();
-        $neighborhood = Neighborhood::where('city_id', $city->id)
-            ->where('slug', $neighborhoodSlug)
-            ->firstOrFail();
+        
         return $this->showServiceNeighborhood($city, $service, $neighborhood);
     }
 
     private function showServiceNeighborhood(City $city, Service $service, Neighborhood $neighborhood): View
     {
-        // Check indexability - return 404 if not indexable
-        if (!$this->indexabilityGate->isNeighborhoodServiceIndexable($city, $service, $neighborhood)) {
-            abort(404);
-        }
+        // Check indexability - return 200 with noindex if not indexable
+        $isIndexable = $this->indexabilityGate->isNeighborhoodServiceIndexable($city, $service, $neighborhood);
 
-        $isCleveland = $city->slug === 'cleveland';
-        $cityUrl = $isCleveland ? route('cleveland.show') : route('city.show', ['city' => $city->slug]);
-        $serviceUrl = $isCleveland ? route('cleveland.service.show', ['service' => $service->slug]) : route('city.service.show', ['city' => $city->slug, 'service' => $service->slug]);
-        $neighborhoodUrl = $isCleveland ? route('cleveland.service.neighborhood.show', ['service' => $service->slug, 'neighborhood' => $neighborhood->slug]) : route('city.service.neighborhood.show', ['city' => $city->slug, 'service' => $service->slug, 'neighborhood' => $neighborhood->slug]);
+        $cityUrl = route('city.show', ['state' => strtolower($city->state), 'city' => $city->slug]);
+        $serviceUrl = route('city.service.show', ['state' => strtolower($city->state), 'city' => $city->slug, 'service' => $service->slug]);
+        $neighborhoodUrl = route('city.service.neighborhood.show', ['state' => strtolower($city->state), 'city' => $city->slug, 'service' => $service->slug, 'neighborhood' => $neighborhood->slug]);
 
         // Get neighborhood-specific data
         $neighborhoodData = $this->pageData->getNeighborhoodData($city, $service, $neighborhood);
@@ -74,6 +70,7 @@ class CityServiceNeighborhoodController extends Controller
 
         $breadcrumbs = [
             ['name' => 'Home', 'url' => route('home')],
+            ['name' => 'Locations', 'url' => route('locations.index')],
             ['name' => "{$city->name} Locksmith", 'url' => $cityUrl],
             ['name' => $service->name, 'url' => $serviceUrl],
             ['name' => "{$service->name} in {$neighborhood->name}", 'url' => $neighborhoodUrl],
@@ -102,7 +99,7 @@ class CityServiceNeighborhoodController extends Controller
             'title' => $titleMeta['title'],
             'meta_description' => $titleMeta['meta_description'],
             'neighborhoodData' => $neighborhoodData,
-            'isIndexable' => true,
+            'isIndexable' => $isIndexable,
         ]);
     }
 }

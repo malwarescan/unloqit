@@ -71,24 +71,28 @@
                 
                 <div class="bg-brand-dark border-l-4 border-brand-accent p-8">
                     <h3 class="font-display font-bold text-2xl mb-6 text-brand-white tracking-tight uppercase">
-                        Why Choose Unloqit for <?php echo e($service->name); ?>?
+                        Why Use Unloqit for <?php echo e($service->name); ?>?
                     </h3>
                     <ul class="space-y-4 text-brand-gray text-lg">
                         <li class="flex items-start">
                             <span class="text-brand-accent mr-3 font-bold">•</span>
-                            <span>24/7 availability for emergency situations</span>
+                            <span>Instant matching with available pros 24/7</span>
                         </li>
                         <li class="flex items-start">
                             <span class="text-brand-accent mr-3 font-bold">•</span>
-                            <span>Fast response times in <?php echo e($city->name); ?></span>
+                            <span>Fast response times in <?php echo e($city->name); ?> (20-30 min average)</span>
                         </li>
                         <li class="flex items-start">
                             <span class="text-brand-accent mr-3 font-bold">•</span>
-                            <span>Licensed and insured professionals</span>
+                            <span>Verified Unloqit Pro Service Providers—all licensed and insured</span>
                         </li>
                         <li class="flex items-start">
                             <span class="text-brand-accent mr-3 font-bold">•</span>
-                            <span>Competitive pricing with no hidden fees</span>
+                            <span>Transparent pricing—pros quote before work begins</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-brand-accent mr-3 font-bold">•</span>
+                            <span>Real-time job tracking—see when your pro arrives</span>
                         </li>
                     </ul>
                 </div>
@@ -98,11 +102,31 @@
                         Serving <?php echo e($city->name); ?> Neighborhoods
                     </h3>
                     <p class="text-lg text-brand-dark-60 leading-relaxed">
-                        We provide <?php echo e(strtolower($service->name)); ?> services throughout <?php echo e($city->name); ?> and surrounding areas. 
-                        Our locksmiths are familiar with the local area and can provide fast service.
+                        Unloqit Pro Service Providers offer <?php echo e(strtolower($service->name)); ?> services throughout <?php echo e($city->name); ?> and surrounding areas. 
+                        Pros on the platform are familiar with local neighborhoods and deliver fast service.
                     </p>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- Marketplace CTA -->
+<section class="industrial-bg py-24 relative">
+    <div class="container mx-auto px-6 relative z-10">
+        <div class="max-w-4xl mx-auto text-center section-reveal">
+            <h2 class="font-display font-black text-5xl md:text-6xl mb-6 text-brand-white tracking-tight">
+                Need <?php echo e($service->name); ?> Now?
+            </h2>
+            <p class="text-xl text-brand-gray mb-10 leading-relaxed max-w-2xl mx-auto">
+                Unloqit Pro Service Providers in <?php echo e($city->name); ?> are ready. Request help and get matched with a verified locksmith instantly.
+            </p>
+            <a href="<?php echo e(route('request.show.context', ['city' => $city->slug, 'service' => $service->slug])); ?>" class="emergency-button inline-block">
+                Request an Unloqit Pro
+            </a>
+            <p class="text-brand-gray text-sm mt-4">
+                Average response time: 20-30 minutes
+            </p>
         </div>
     </div>
 </section>

@@ -15,7 +15,7 @@ class ServiceSchema
             'name' => "{$service->name} in {$city->name}",
             'description' => $service->description ?? "Professional {$service->name} services in {$city->name}, {$city->state}.",
             'provider' => [
-                '@id' => 'https://unloqit.com/#organization',
+                '@id' => 'https://www.unloqit.com/#organization',
                 '@type' => 'Organization',
                 'name' => 'Unloqit',
             ],

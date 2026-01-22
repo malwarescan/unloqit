@@ -6,22 +6,42 @@ use App\Http\Controllers\CityServiceNeighborhoodController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\GuideController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LocationsController;
 use App\Http\Controllers\ProDashboardController;
 use App\Http\Controllers\RequestController;
+use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
+// STEP 3: Explicit legacy URL redirects (MUST be at top, before any other routes)
+// These prevent 404s and ensure proper 301 redirects
+Route::permanentRedirect('/cleveland-locksmith', '/locksmith/oh/cleveland');
+
+// Handle all Cleveland legacy subpaths
+Route::get('/cleveland-locksmith/{any}', function ($any) {
+    $path = ltrim($any, '/');
+    // Handle service-only paths
+    if (!str_contains($path, '/')) {
+        return redirect()->to('/locksmith/oh/cleveland/' . $path, 301);
+    }
+    // Handle service/neighborhood paths
+    return redirect()->to('/locksmith/oh/cleveland/' . $path, 301);
+})->where('any', '.*');
+
+// Homepage (nationwide)
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Root market (Cleveland) URLs
-Route::get('/cleveland-locksmith', [CityController::class, 'showCleveland'])->name('cleveland.show');
-Route::get('/cleveland-locksmith/{service}', [CityServiceController::class, 'showClevelandService'])->name('cleveland.service.show');
-Route::get('/cleveland-locksmith/{service}/{neighborhood}', [CityServiceNeighborhoodController::class, 'showClevelandServiceNeighborhood'])->name('cleveland.service.neighborhood.show');
+// Services directory
+Route::get('/services', [ServicesController::class, 'index'])->name('services.index');
+Route::get('/services/{service}', [ServicesController::class, 'show'])->name('services.show');
 
-// Future cities
-Route::get('/locksmith/{city}', [CityController::class, 'show'])->name('city.show');
-Route::get('/locksmith/{city}/{service}', [CityServiceController::class, 'show'])->name('city.service.show');
-Route::get('/locksmith/{city}/{service}/{neighborhood}', [CityServiceNeighborhoodController::class, 'show'])->name('city.service.neighborhood.show');
+// Locations directory
+Route::get('/locations', [LocationsController::class, 'index'])->name('locations.index');
+
+// City pages (new canonical structure: /locksmith/{state}/{city})
+Route::get('/locksmith/{state}/{city}', [CityController::class, 'show'])->name('city.show');
+Route::get('/locksmith/{state}/{city}/{service}', [CityServiceController::class, 'show'])->name('city.service.show');
+Route::get('/locksmith/{state}/{city}/{service}/{neighborhood}', [CityServiceNeighborhoodController::class, 'show'])->name('city.service.neighborhood.show');
 
 // Marketplace - Customer Request Flow
 Route::get('/request-locksmith', [RequestController::class, 'show'])->name('request.show');
@@ -55,9 +75,9 @@ Route::get('/faq/{slug}', [FaqController::class, 'show'])->name('faq.show');
 
 // Sitemaps
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
-Route::get('/sitemap-cities.xml', [SitemapController::class, 'cities'])->name('sitemap.cities');
 Route::get('/sitemap-services.xml', [SitemapController::class, 'services'])->name('sitemap.services');
+Route::get('/sitemap-locations.xml', [SitemapController::class, 'locations'])->name('sitemap.locations');
+Route::get('/sitemap-city-services.xml', [SitemapController::class, 'cityServices'])->name('sitemap.city-services');
 Route::get('/sitemap-guides.xml', [SitemapController::class, 'guides'])->name('sitemap.guides');
 Route::get('/sitemap-faq.xml', [SitemapController::class, 'faq'])->name('sitemap.faq');
-Route::get('/sitemap.ndjson', [SitemapController::class, 'ndjson'])->name('sitemap.ndjson');
 

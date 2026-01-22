@@ -1,4 +1,4 @@
-<?php $__env->startSection('title', 'Become a Lock Pro | Join Unloqit Marketplace'); ?>
+<?php $__env->startSection('title', 'Become an Unloqit Pro Service Provider | Join Unloqit Marketplace'); ?>
 <?php $__env->startSection('meta_description', 'Join Unloqit as a verified locksmith. Set your own schedule, earn competitive rates, and help customers in your area.'); ?>
 <?php $__env->startSection('canonical', route('pro.register')); ?>
 
@@ -10,10 +10,10 @@
     <div class="container mx-auto px-6 relative z-10">
         <div class="max-w-4xl mx-auto text-center">
             <h1 class="font-display font-black text-6xl md:text-7xl mb-6 tracking-tight text-shadow-lg animate-fade-in-up">
-                Become a Lock Pro
+                Become an Unloqit Pro<br>Service Provider
             </h1>
             <p class="text-xl md:text-2xl text-brand-gray font-medium leading-relaxed animate-fade-in-up" style="animation-delay: 0.2s;">
-                Join the on-demand locksmith marketplace. Set your schedule, earn competitive rates, help customers in your area.
+                Join the Unloqit marketplace as a verified locksmith. Set your schedule, earn competitive rates, help customers in your area.
             </p>
         </div>
     </div>
@@ -178,7 +178,7 @@ unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <button type="submit" class="emergency-button w-full text-center">
-                        Join as Lock Pro
+                        Join as Unloqit Pro Service Provider
                     </button>
 
                     <p class="text-center text-brand-dark-60 text-sm">

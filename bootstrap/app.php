@@ -11,6 +11,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Force canonical host FIRST (before any other redirects)
+        $middleware->web(prepend: [
+            \App\Http\Middleware\ForceCanonicalHost::class,
+        ]);
+        // Then handle URL normalization (trailing slash, lowercase, legacy URLs)
         $middleware->web(append: [
             \App\Http\Middleware\CanonicalRedirect::class,
         ]);

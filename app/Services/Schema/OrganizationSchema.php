@@ -14,10 +14,10 @@ class OrganizationSchema
         return [
             '@context' => 'https://schema.org',
             '@type' => 'Organization',
-            '@id' => 'https://unloqit.com/#organization',
+            '@id' => 'https://www.unloqit.com/#organization',
             'name' => 'Unloqit',
-            'url' => 'https://unloqit.com',
-            'logo' => 'https://unloqit.com/unloqit-logo.png',
+            'url' => 'https://www.unloqit.com',
+            'logo' => 'https://www.unloqit.com/unloqit-logo.png',
             'description' => 'On-demand locksmith marketplace connecting customers with verified locksmith professionals. 24/7 emergency locksmith services, car lockouts, key programming, and more.',
             'contactPoint' => [
                 '@type' => 'ContactPoint',

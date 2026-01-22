@@ -26,7 +26,7 @@
                 </a>
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="<?php echo e(route('cleveland.show')); ?>" class="text-brand-white font-display font-bold text-lg tracking-wide uppercase hover:text-brand-accent transition-colors duration-300 accent-underline">Services</a>
-                    <a href="<?php echo e(route('pro.register')); ?>" class="text-brand-white font-display font-bold text-lg tracking-wide uppercase hover:text-brand-accent transition-colors duration-300 accent-underline">Become a Lock Pro</a>
+                    <a href="<?php echo e(route('pro.register')); ?>" class="text-brand-white font-display font-bold text-lg tracking-wide uppercase hover:text-brand-accent transition-colors duration-300 accent-underline">Become an Unloqit Pro</a>
                 </div>
             </div>
         </nav>
@@ -43,7 +43,7 @@
                     <h3 class="font-display font-bold text-2xl text-brand-white mb-4 tracking-wide uppercase">Unloqit</h3>
                     <p class="text-brand-gray text-sm leading-relaxed mb-4">24/7 emergency locksmith services in Cleveland, Ohio. Precision. Speed. Reliability.</p>
                     <a href="<?php echo e(route('pro.register')); ?>" class="inline-block px-4 py-2 bg-brand-accent text-brand-white font-display font-bold text-sm uppercase tracking-wide hover:bg-brand-accent-80 transition">
-                        Become a Lock Pro
+                        Become an Unloqit Pro Service Provider
                     </a>
                 </div>
                 <div>
