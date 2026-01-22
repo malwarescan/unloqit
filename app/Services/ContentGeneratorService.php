@@ -7,10 +7,16 @@ use App\Models\ContentTemplate;
 use App\Models\GeneratedContent;
 use App\Models\Neighborhood;
 use App\Models\Service;
+use App\Services\IndexabilityGate;
+use App\Services\PageDataService;
 use Illuminate\Support\Str;
 
 class ContentGeneratorService
 {
+    public function __construct(
+        private IndexabilityGate $indexabilityGate,
+        private PageDataService $pageData
+    ) {}
     /**
      * Generate content for a city page
      */
@@ -34,6 +40,9 @@ class ContentGeneratorService
             ? $this->processTemplate($template->title_template, $variables)
             : $this->generateDefaultTitle('city', $variables);
 
+        // Quality checks before publishing
+        $shouldPublish = $this->shouldPublishContent('city', $city, null, null, $content);
+
         return GeneratedContent::updateOrCreate(
             [
                 'content_type' => 'city',
@@ -47,7 +56,7 @@ class ContentGeneratorService
                 'meta_description' => $metaDescription,
                 'title' => $title,
                 'is_auto_generated' => true,
-                'is_published' => true,
+                'is_published' => $shouldPublish,
                 'generated_at' => now(),
             ]
         );
@@ -76,6 +85,9 @@ class ContentGeneratorService
             ? $this->processTemplate($template->title_template, $variables)
             : $this->generateDefaultTitle('service', $variables);
 
+        // Quality checks before publishing
+        $shouldPublish = $this->shouldPublishContent('service', $city, $service, null, $content);
+
         return GeneratedContent::updateOrCreate(
             [
                 'content_type' => 'service',
@@ -89,7 +101,7 @@ class ContentGeneratorService
                 'meta_description' => $metaDescription,
                 'title' => $title,
                 'is_auto_generated' => true,
-                'is_published' => true,
+                'is_published' => $shouldPublish,
                 'generated_at' => now(),
             ]
         );
@@ -118,6 +130,9 @@ class ContentGeneratorService
             ? $this->processTemplate($template->title_template, $variables)
             : $this->generateDefaultTitle('neighborhood', $variables);
 
+        // Quality checks before publishing
+        $shouldPublish = $this->shouldPublishContent('neighborhood', $city, $service, $neighborhood, $content);
+
         return GeneratedContent::updateOrCreate(
             [
                 'content_type' => 'neighborhood',
@@ -131,7 +146,7 @@ class ContentGeneratorService
                 'meta_description' => $metaDescription,
                 'title' => $title,
                 'is_auto_generated' => true,
-                'is_published' => true,
+                'is_published' => $shouldPublish,
                 'generated_at' => now(),
             ]
         );
@@ -276,6 +291,112 @@ class ContentGeneratorService
             'is_active' => true,
             'priority' => 0,
         ]);
+    }
+
+    /**
+     * Check if content should be published based on quality gates
+     */
+    protected function shouldPublishContent(string $type, City $city, ?Service $service, ?Neighborhood $neighborhood, string $content): bool
+    {
+        // 1. Indexability gate - must have real coverage
+        if ($type === 'city') {
+            if (!$this->indexabilityGate->isCityIndexable($city)) {
+                return false;
+            }
+        } elseif ($type === 'service') {
+            if (!$this->indexabilityGate->isCityServiceIndexable($city, $service)) {
+                return false;
+            }
+        } elseif ($type === 'neighborhood') {
+            if (!$this->indexabilityGate->isNeighborhoodServiceIndexable($city, $service, $neighborhood)) {
+                return false;
+            }
+        }
+
+        // 2. Uniqueness check - content must not be too similar to other pages
+        if (!$this->checkContentUniqueness($type, $city, $service, $neighborhood, $content)) {
+            return false;
+        }
+
+        // 3. Data presence check - must have real data modules available
+        if (!$this->checkDataPresence($type, $city, $service, $neighborhood)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check content uniqueness (prevent duplicate/spam content)
+     */
+    protected function checkContentUniqueness(string $type, City $city, ?Service $service, ?Neighborhood $neighborhood, string $content): bool
+    {
+        // Hash the content (excluding variable tokens)
+        $normalizedContent = preg_replace('/\{[^}]+\}/', '', $content);
+        $contentHash = md5(strtolower(trim($normalizedContent)));
+
+        // Check for similar content in other pages of the same type
+        $query = GeneratedContent::where('content_type', $type)
+            ->where('id', '!=', 0) // Exclude current (will be updated)
+            ->where('is_published', true);
+
+        if ($type === 'city') {
+            $query->where('city_id', '!=', $city->id);
+        } elseif ($type === 'service') {
+            $query->where(function ($q) use ($city, $service) {
+                $q->where('city_id', '!=', $city->id)
+                  ->orWhere('service_id', '!=', $service->id);
+            });
+        } elseif ($type === 'neighborhood') {
+            $query->where(function ($q) use ($city, $service, $neighborhood) {
+                $q->where('city_id', '!=', $city->id)
+                  ->orWhere('service_id', '!=', $service->id)
+                  ->orWhere('neighborhood_id', '!=', $neighborhood->id);
+            });
+        }
+
+        // Check if any existing content has the same hash (too similar)
+        $similarCount = $query->get()->filter(function ($existing) use ($contentHash) {
+            $existingNormalized = preg_replace('/\{[^}]+\}/', '', $existing->content);
+            $existingHash = md5(strtolower(trim($existingNormalized)));
+            return $existingHash === $contentHash;
+        })->count();
+
+        // If more than 2 pages have identical content, it's likely spam
+        return $similarCount < 2;
+    }
+
+    /**
+     * Check if page has enough real data to be valuable
+     */
+    protected function checkDataPresence(string $type, City $city, ?Service $service, ?Neighborhood $neighborhood): bool
+    {
+        $dataModulesCount = 0;
+
+        if ($type === 'city') {
+            $coverageData = $this->pageData->getCityCoverageData($city);
+            if ($coverageData['provider_count'] > 0) $dataModulesCount++;
+            if ($coverageData['online_providers'] > 0) $dataModulesCount++;
+            if ($coverageData['avg_response_time_minutes'] !== null) $dataModulesCount++;
+        } elseif ($type === 'service') {
+            $coverageData = $this->pageData->getCityServiceCoverageData($city, $service);
+            $activityData = $this->pageData->getCityServiceActivity($city, $service);
+            $pricingRange = $this->pageData->getCityServicePricingRange($city, $service);
+
+            if ($coverageData['provider_count'] > 0) $dataModulesCount++;
+            if ($coverageData['online_providers'] > 0) $dataModulesCount++;
+            if ($coverageData['avg_response_time_minutes'] !== null) $dataModulesCount++;
+            if ($activityData['completed_jobs_30_days'] > 0) $dataModulesCount++;
+            if ($pricingRange !== null) $dataModulesCount++;
+        } elseif ($type === 'neighborhood') {
+            $neighborhoodData = $this->pageData->getNeighborhoodData($city, $service, $neighborhood);
+            if ($neighborhoodData['completed_jobs_180_days'] > 0) $dataModulesCount++;
+            if ($neighborhoodData['avg_response_time_minutes'] !== null) $dataModulesCount++;
+        }
+
+        // Require at least 2 real data modules for city/service, 1 for neighborhood
+        $requiredModules = $type === 'neighborhood' ? 1 : 2;
+        return $dataModulesCount >= $requiredModules;
     }
 }
 

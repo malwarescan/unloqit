@@ -1,7 +1,9 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
-Disallow: /login
+Disallow: /pro/
+Disallow: /request/
+Disallow: /request-locksmith
 
 Sitemap: https://unloqit.com/sitemap.xml
 

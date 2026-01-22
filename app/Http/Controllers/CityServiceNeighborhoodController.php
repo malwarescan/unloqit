@@ -6,6 +6,8 @@ use App\Models\City;
 use App\Models\GeneratedContent;
 use App\Models\Neighborhood;
 use App\Models\Service;
+use App\Services\IndexabilityGate;
+use App\Services\PageDataService;
 use App\Services\Schema\BreadcrumbSchema;
 use App\Services\Schema\LocalBusinessSchema;
 use App\Services\Schema\OrganizationSchema;
@@ -18,7 +20,9 @@ use Illuminate\View\View;
 class CityServiceNeighborhoodController extends Controller
 {
     public function __construct(
-        private TitleMetaService $titleMeta
+        private TitleMetaService $titleMeta,
+        private IndexabilityGate $indexabilityGate,
+        private PageDataService $pageData
     ) {}
 
     public function showClevelandServiceNeighborhood(string $serviceSlug, string $neighborhoodSlug): View
@@ -43,10 +47,18 @@ class CityServiceNeighborhoodController extends Controller
 
     private function showServiceNeighborhood(City $city, Service $service, Neighborhood $neighborhood): View
     {
+        // Check indexability - return 404 if not indexable
+        if (!$this->indexabilityGate->isNeighborhoodServiceIndexable($city, $service, $neighborhood)) {
+            abort(404);
+        }
+
         $isCleveland = $city->slug === 'cleveland';
         $cityUrl = $isCleveland ? route('cleveland.show') : route('city.show', ['city' => $city->slug]);
         $serviceUrl = $isCleveland ? route('cleveland.service.show', ['service' => $service->slug]) : route('city.service.show', ['city' => $city->slug, 'service' => $service->slug]);
         $neighborhoodUrl = $isCleveland ? route('cleveland.service.neighborhood.show', ['service' => $service->slug, 'neighborhood' => $neighborhood->slug]) : route('city.service.neighborhood.show', ['city' => $city->slug, 'service' => $service->slug, 'neighborhood' => $neighborhood->slug]);
+
+        // Get neighborhood-specific data
+        $neighborhoodData = $this->pageData->getNeighborhoodData($city, $service, $neighborhood);
 
         // Check for generated content first, fallback to TitleMetaService
         $generatedContent = GeneratedContent::where('content_type', 'neighborhood')
@@ -68,8 +80,7 @@ class CityServiceNeighborhoodController extends Controller
         ];
 
         $schema = [
-            OrganizationSchema::base(),
-            LocalBusinessSchema::forCity($city),
+            OrganizationSchema::withServiceArea($city),
             ServiceSchema::forServiceInCity($service, $city),
             WebPageSchema::generate(
                 $titleMeta['title'],
@@ -90,6 +101,8 @@ class CityServiceNeighborhoodController extends Controller
             'neighborhoodUrl' => $neighborhoodUrl,
             'title' => $titleMeta['title'],
             'meta_description' => $titleMeta['meta_description'],
+            'neighborhoodData' => $neighborhoodData,
+            'isIndexable' => true,
         ]);
     }
 }

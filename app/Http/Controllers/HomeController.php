@@ -34,7 +34,7 @@ class HomeController extends Controller
         ];
 
         if ($cleveland) {
-            $schema[] = LocalBusinessSchema::forCity($cleveland);
+            $schema[0] = OrganizationSchema::withServiceArea($cleveland);
         }
 
         $jsonld = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

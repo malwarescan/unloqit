@@ -3,6 +3,9 @@
 @section('title', 'Unloqit Pro Dashboard | Unloqit')
 @section('meta_description', 'Manage your locksmith jobs, earnings, and availability.')
 @section('canonical', route('pro.dashboard'))
+@section('meta_extra')
+<meta name="robots" content="noindex,follow">
+@endsection
 
 @section('content')
 <section class="industrial-bg text-brand-white py-16 relative">

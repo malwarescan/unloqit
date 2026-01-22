@@ -6,11 +6,16 @@ use App\Models\City;
 use App\Models\Faq;
 use App\Models\Guide;
 use App\Models\Service;
+use App\Services\IndexabilityGate;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
 
 class SitemapController extends Controller
 {
+    public function __construct(
+        private IndexabilityGate $indexabilityGate
+    ) {}
+
     public function index(): Response
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
@@ -32,15 +37,23 @@ class SitemapController extends Controller
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
         
-        // Homepage
+        // Homepage (always indexable)
         $xml .= '  <url><loc>' . $baseUrl . '/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>' . "\n";
         
-        // Cleveland special route
-        $xml .= '  <url><loc>' . $baseUrl . '/cleveland-locksmith</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>' . "\n";
+        // Cleveland special route (only if indexable)
+        $cleveland = City::where('slug', 'cleveland')->first();
+        if ($cleveland && $this->indexabilityGate->isCityIndexable($cleveland)) {
+            $xml .= '  <url><loc>' . $baseUrl . '/cleveland-locksmith</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>' . "\n";
+        }
         
-        // City pages
+        // City pages (only indexable ones)
         foreach ($cities as $city) {
-            $xml .= '  <url><loc>' . $baseUrl . '/locksmith/' . $city->slug . '</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>' . "\n";
+            if ($this->indexabilityGate->isCityIndexable($city)) {
+                // Only include standard route, not both cleveland routes
+                if ($city->slug !== 'cleveland') {
+                    $xml .= '  <url><loc>' . $baseUrl . '/locksmith/' . $city->slug . '</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>' . "\n";
+                }
+            }
         }
         
         $xml .= '</urlset>';
@@ -53,26 +66,52 @@ class SitemapController extends Controller
         $cities = City::all();
         $services = Service::all();
         $baseUrl = 'https://unloqit.com';
+        $urlCount = 0;
+        $maxUrls = 50000; // Google's limit
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
         
         foreach ($cities as $city) {
+            // Skip if city not indexable
+            if (!$this->indexabilityGate->isCityIndexable($city)) {
+                continue;
+            }
+
             foreach ($services as $service) {
-                // Cleveland special routes
+                // Skip if city-service not indexable
+                if (!$this->indexabilityGate->isCityServiceIndexable($city, $service)) {
+                    continue;
+                }
+
+                // Only include Cleveland special route (canonical), not both
                 if ($city->slug === 'cleveland') {
                     $xml .= '  <url><loc>' . $baseUrl . '/cleveland-locksmith/' . $service->slug . '</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>' . "\n";
+                    $urlCount++;
+                } else {
+                    // Standard routes for other cities
+                    $xml .= '  <url><loc>' . $baseUrl . '/locksmith/' . $city->slug . '/' . $service->slug . '</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>' . "\n";
+                    $urlCount++;
                 }
                 
-                // Standard routes
-                $xml .= '  <url><loc>' . $baseUrl . '/locksmith/' . $city->slug . '/' . $service->slug . '</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>' . "\n";
-                
-                // Neighborhood pages
+                // Neighborhood pages (only indexable ones)
                 foreach ($city->neighborhoods as $neighborhood) {
+                    if ($urlCount >= $maxUrls) {
+                        break 3; // Break out of all loops
+                    }
+
+                    if (!$this->indexabilityGate->isNeighborhoodServiceIndexable($city, $service, $neighborhood)) {
+                        continue;
+                    }
+
+                    // Only include Cleveland special route
                     if ($city->slug === 'cleveland') {
                         $xml .= '  <url><loc>' . $baseUrl . '/cleveland-locksmith/' . $service->slug . '/' . $neighborhood->slug . '</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>' . "\n";
+                        $urlCount++;
+                    } else {
+                        $xml .= '  <url><loc>' . $baseUrl . '/locksmith/' . $city->slug . '/' . $service->slug . '/' . $neighborhood->slug . '</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>' . "\n";
+                        $urlCount++;
                     }
-                    $xml .= '  <url><loc>' . $baseUrl . '/locksmith/' . $city->slug . '/' . $service->slug . '/' . $neighborhood->slug . '</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>' . "\n";
                 }
             }
         }

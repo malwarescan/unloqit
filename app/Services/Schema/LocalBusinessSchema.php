@@ -6,53 +6,38 @@ use App\Models\City;
 
 class LocalBusinessSchema
 {
+    /**
+     * Generate service area schema for Organization (not fake LocalBusiness per city)
+     * This represents the marketplace's service coverage area, not a physical location
+     */
+    public static function forServiceArea(City $city): array
+    {
+        return [
+            '@type' => 'City',
+            'name' => $city->name,
+            'addressRegion' => $city->state,
+            'addressCountry' => 'US',
+        ];
+    }
+
+    /**
+     * @deprecated Use OrganizationSchema with areaServed instead
+     * This method is kept for backward compatibility but should not be used for new pages
+     */
     public static function forCity(City $city): array
     {
-        $schema = [
+        // Return minimal schema - we should use Organization with areaServed instead
+        return [
             '@context' => 'https://schema.org',
-            '@type' => 'LocalBusiness',
-            '@id' => 'https://unloqit.com/#localbusiness',
-            'name' => "Unloqit - {$city->name} Locksmith",
-            'image' => 'https://unloqit.com/unloqit-logo.png',
-            'description' => "24/7 locksmith services in {$city->name}, {$city->state}. Emergency lockout service, car keys, rekeying, and more.",
+            '@type' => 'Organization',
+            'name' => 'Unloqit',
             'url' => 'https://unloqit.com',
-            'telephone' => '+1-XXX-XXX-XXXX',
-            'priceRange' => '$$',
-            'address' => [
-                '@type' => 'PostalAddress',
-                'addressLocality' => $city->name,
-                'addressRegion' => $city->state,
-                'addressCountry' => 'US',
-            ],
             'areaServed' => [
                 '@type' => 'City',
                 'name' => $city->name,
-            ],
-            'openingHoursSpecification' => [
-                '@type' => 'OpeningHoursSpecification',
-                'dayOfWeek' => [
-                    'Monday',
-                    'Tuesday',
-                    'Wednesday',
-                    'Thursday',
-                    'Friday',
-                    'Saturday',
-                    'Sunday',
-                ],
-                'opens' => '00:00',
-                'closes' => '23:59',
+                'addressRegion' => $city->state,
             ],
         ];
-
-        if ($city->lat && $city->lng) {
-            $schema['geo'] = [
-                '@type' => 'GeoCoordinates',
-                'latitude' => (float) $city->lat,
-                'longitude' => (float) $city->lng,
-            ];
-        }
-
-        return $schema;
     }
 }
 

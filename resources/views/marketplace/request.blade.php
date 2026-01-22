@@ -3,6 +3,9 @@
 @section('title', $title ?? 'Request a Locksmith | Instant Help | Unloqit')
 @section('meta_description', $meta_description ?? 'Request a locksmith instantly. Unloqit Pro Service Providers in your area are ready to help. Fast response, professional service.')
 @section('canonical', route('request.show'))
+@section('meta_extra')
+<meta name="robots" content="noindex,follow">
+@endsection
 
 @section('content')
 <section class="industrial-bg text-brand-white py-24 relative overflow-hidden">

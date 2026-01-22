@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\City;
 use App\Models\GeneratedContent;
 use App\Models\Service;
+use App\Services\IndexabilityGate;
+use App\Services\PageDataService;
 use App\Services\Schema\BreadcrumbSchema;
 use App\Services\Schema\LocalBusinessSchema;
 use App\Services\Schema\OrganizationSchema;
@@ -17,7 +19,9 @@ use Illuminate\View\View;
 class CityServiceController extends Controller
 {
     public function __construct(
-        private TitleMetaService $titleMeta
+        private TitleMetaService $titleMeta,
+        private IndexabilityGate $indexabilityGate,
+        private PageDataService $pageData
     ) {}
 
     public function showClevelandService(string $serviceSlug): View
@@ -36,9 +40,19 @@ class CityServiceController extends Controller
 
     private function showService(City $city, Service $service): View
     {
+        // Check indexability - return 404 if not indexable
+        if (!$this->indexabilityGate->isCityServiceIndexable($city, $service)) {
+            abort(404);
+        }
+
         $isCleveland = $city->slug === 'cleveland';
         $cityUrl = $isCleveland ? route('cleveland.show') : route('city.show', ['city' => $city->slug]);
         $serviceUrl = $isCleveland ? route('cleveland.service.show', ['service' => $service->slug]) : route('city.service.show', ['city' => $city->slug, 'service' => $service->slug]);
+
+        // Get real data modules
+        $coverageData = $this->pageData->getCityServiceCoverageData($city, $service);
+        $activityData = $this->pageData->getCityServiceActivity($city, $service);
+        $pricingRange = $this->pageData->getCityServicePricingRange($city, $service);
 
         // Check for generated content first, fallback to TitleMetaService
         $generatedContent = GeneratedContent::where('content_type', 'service')
@@ -58,8 +72,7 @@ class CityServiceController extends Controller
         ];
 
         $schema = [
-            OrganizationSchema::base(),
-            LocalBusinessSchema::forCity($city),
+            OrganizationSchema::withServiceArea($city),
             ServiceSchema::forServiceInCity($service, $city),
             WebPageSchema::generate(
                 $titleMeta['title'],
@@ -79,6 +92,10 @@ class CityServiceController extends Controller
             'serviceUrl' => $serviceUrl,
             'title' => $titleMeta['title'],
             'meta_description' => $titleMeta['meta_description'],
+            'coverageData' => $coverageData,
+            'activityData' => $activityData,
+            'pricingRange' => $pricingRange,
+            'isIndexable' => true,
         ]);
     }
 }

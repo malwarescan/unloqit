@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\City;
 use App\Models\GeneratedContent;
 use App\Models\Service;
+use App\Services\IndexabilityGate;
+use App\Services\PageDataService;
 use App\Services\Schema\BreadcrumbSchema;
 use App\Services\Schema\LocalBusinessSchema;
 use App\Services\Schema\OrganizationSchema;
@@ -12,11 +14,14 @@ use App\Services\Schema\WebPageSchema;
 use App\Services\TitleMetaService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CityController extends Controller
 {
     public function __construct(
-        private TitleMetaService $titleMeta
+        private TitleMetaService $titleMeta,
+        private IndexabilityGate $indexabilityGate,
+        private PageDataService $pageData
     ) {}
 
     public function showCleveland(): View
@@ -33,10 +38,18 @@ class CityController extends Controller
 
     private function showCity(City $city): View
     {
+        // Check indexability - return 404 if not indexable
+        if (!$this->indexabilityGate->isCityIndexable($city)) {
+            abort(404);
+        }
+
         $services = Service::all();
         
         $isCleveland = $city->slug === 'cleveland';
         $cityUrl = $isCleveland ? route('cleveland.show') : route('city.show', ['city' => $city->slug]);
+
+        // Get real coverage data
+        $coverageData = $this->pageData->getCityCoverageData($city);
 
         // Check for generated content first, fallback to TitleMetaService
         $generatedContent = GeneratedContent::where('content_type', 'city')
@@ -57,8 +70,7 @@ class CityController extends Controller
         ];
 
         $schema = [
-            OrganizationSchema::base(),
-            LocalBusinessSchema::forCity($city),
+            OrganizationSchema::withServiceArea($city),
             WebPageSchema::generate(
                 $title,
                 $cityUrl,
@@ -78,6 +90,8 @@ class CityController extends Controller
             'generatedContent' => $generatedContent,
             'title' => $title,
             'meta_description' => $metaDescription,
+            'coverageData' => $coverageData,
+            'isIndexable' => true,
         ]);
     }
 }

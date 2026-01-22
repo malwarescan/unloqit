@@ -15,18 +15,15 @@ class ServiceSchema
             'name' => "{$service->name} in {$city->name}",
             'description' => $service->description ?? "Professional {$service->name} services in {$city->name}, {$city->state}.",
             'provider' => [
-                '@type' => 'LocalBusiness',
+                '@id' => 'https://unloqit.com/#organization',
+                '@type' => 'Organization',
                 'name' => 'Unloqit',
-                'address' => [
-                    '@type' => 'PostalAddress',
-                    'addressLocality' => $city->name,
-                    'addressRegion' => $city->state,
-                    'addressCountry' => 'US',
-                ],
             ],
             'areaServed' => [
                 '@type' => 'City',
                 'name' => $city->name,
+                'addressRegion' => $city->state,
+                'addressCountry' => 'US',
             ],
             'serviceType' => $service->name,
         ];

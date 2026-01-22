@@ -3,6 +3,9 @@
 @section('title', 'Track Your Request | Unloqit')
 @section('meta_description', 'Track your locksmith request in real-time. See when your Unloqit Pro arrives.')
 @section('canonical', route('request.track', ['job' => $job->id]))
+@section('meta_extra')
+<meta name="robots" content="noindex,follow">
+@endsection
 
 @section('content')
 <section class="industrial-bg text-brand-white py-24 relative overflow-hidden">

@@ -3,6 +3,9 @@
 @section('title', $title ?? 'Unloqit Pro Login | Unloqit')
 @section('meta_description', $meta_description ?? 'Login to your Unloqit Pro dashboard to manage jobs and earnings.')
 @section('canonical', route('pro.login'))
+@section('meta_extra')
+<meta name="robots" content="noindex,follow">
+@endsection
 
 @section('content')
 <section class="industrial-bg text-brand-white py-24 relative overflow-hidden">
