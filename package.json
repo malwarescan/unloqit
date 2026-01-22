@@ -3,7 +3,8 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build && cp public/build/.vite/manifest.json public/build/manifest.json || (echo 'WARNING: Manifest copy failed' && exit 1)",
+        "postbuild": "test -f public/build/.vite/manifest.json && cp public/build/.vite/manifest.json public/build/manifest.json || echo 'Manifest not found in .vite, checking root...'"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.7",
