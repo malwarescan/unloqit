@@ -161,6 +161,17 @@
     .section-reveal:nth-child(3) { animation-delay: 0.3s; }
     .section-reveal:nth-child(4) { animation-delay: 0.4s; }
     
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
     .text-gradient {
         background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-dark-60) 100%);
         -webkit-background-clip: text;
