@@ -55,9 +55,8 @@
             <h2 class="font-display font-black text-5xl md:text-6xl mb-4 text-brand-dark tracking-tight">Our Services</h2>
             <div class="w-24 h-1 bg-brand-accent mx-auto"></div>
         </div>
-        @forelse($services ?? [] as $index => $service)
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @foreach($services as $index => $service)
+            @forelse($services ?? [] as $index => $service)
             <div class="service-card p-8">
                 <h3 class="font-display font-bold text-2xl mb-4 text-brand-dark tracking-tight uppercase">
                     <a href="{{ route('services.show', ['service' => $service->slug]) }}" class="text-brand-dark hover:text-brand-accent transition-colors duration-300">
@@ -72,16 +71,15 @@
                     </svg>
                 </a>
             </div>
-            @endforeach
+            @empty
+            <div class="col-span-full text-center py-12">
+                <p class="text-brand-dark-60 text-lg">Services are being loaded. Please check back shortly.</p>
+                <a href="{{ route('services.index') }}" class="inline-block mt-4 text-brand-accent font-bold hover:text-brand-accent-80 transition-colors duration-300">
+                    View All Services →
+                </a>
+            </div>
+            @endforelse
         </div>
-        @else
-        <div class="text-center py-12">
-            <p class="text-brand-dark-60 text-lg">Services are being loaded. Please check back shortly.</p>
-            <a href="{{ route('services.index') }}" class="inline-block mt-4 text-brand-accent font-bold hover:text-brand-accent-80 transition-colors duration-300">
-                View All Services →
-            </a>
-        </div>
-        @endif
     </div>
 </section>
 
