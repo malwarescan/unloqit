@@ -56,7 +56,7 @@
             <div class="w-24 h-1 bg-brand-accent mx-auto"></div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @forelse($services ?? [] as $index => $service)
+            @forelse($services ?? collect([]) as $index => $service)
             <div class="service-card p-8">
                 <h3 class="font-display font-bold text-2xl mb-4 text-brand-dark tracking-tight uppercase">
                     <a href="{{ route('services.show', ['service' => $service->slug]) }}" class="text-brand-dark hover:text-brand-accent transition-colors duration-300">

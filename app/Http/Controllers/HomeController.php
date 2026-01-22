@@ -19,6 +19,11 @@ class HomeController extends Controller
     {
         $services = Service::all();
         
+        // Ensure services is always a collection, never null
+        if (!$services || $services->isEmpty()) {
+            $services = collect([]);
+        }
+        
         $titleMeta = $this->titleMeta->forHome();
         
         // Homepage schema: Organization + WebSite (with SearchAction) + WebPage
