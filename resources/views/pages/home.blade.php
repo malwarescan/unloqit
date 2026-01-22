@@ -55,6 +55,7 @@
             <h2 class="font-display font-black text-5xl md:text-6xl mb-4 text-brand-dark tracking-tight">Our Services</h2>
             <div class="w-24 h-1 bg-brand-accent mx-auto"></div>
         </div>
+        @if(isset($services) && $services->count() > 0)
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @foreach($services as $index => $service)
             <div class="service-card p-8 section-reveal" style="animation-delay: {{ ($index + 1) * 0.1 }}s;">
@@ -63,7 +64,7 @@
                         {{ $service->name }}
                     </a>
                 </h3>
-                <p class="text-brand-dark-60 mb-6 leading-relaxed">{{ $service->description }}</p>
+                <p class="text-brand-dark-60 mb-6 leading-relaxed">{{ $service->description ?? 'Professional ' . strtolower($service->name) . ' services available nationwide through the Unloqit marketplace.' }}</p>
                 <a href="{{ route('services.show', ['service' => $service->slug]) }}" class="inline-flex items-center text-brand-accent font-bold hover:text-brand-accent-80 transition-colors duration-300 group">
                     <span class="mr-2">Learn more</span>
                     <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,6 +74,14 @@
             </div>
             @endforeach
         </div>
+        @else
+        <div class="text-center py-12">
+            <p class="text-brand-dark-60 text-lg">Services are being loaded. Please check back shortly.</p>
+            <a href="{{ route('services.index') }}" class="inline-block mt-4 text-brand-accent font-bold hover:text-brand-accent-80 transition-colors duration-300">
+                View All Services →
+            </a>
+        </div>
+        @endif
     </div>
 </section>
 
